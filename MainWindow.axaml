@@ -10,10 +10,10 @@
   Classes="window">
   <Border 
     CornerRadius="15" 
-    Background="Black"
+    Background="#1A1A1A"
     Padding="20"
     BorderThickness="1"
-    BorderBrush="White"
+    BorderBrush="#787878"
     Height="400"
     Width="100"
     >

@@ -6,7 +6,50 @@
 
     <Application.Styles>
         <FluentTheme />
+        <Style Selector="TextBlock">
+            <Setter Property="FontFamily" Value="/Assets/Fonts/Geist-Regular.ttf#Geist" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="FontFamily" Value="/Assets/Fonts/Geist-Regular.ttf#Geist" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="FontFamily" Value="/Assets/Fonts/Geist-Regular.ttf#Geist" />
+        </Style>
+        <Style Selector="Label">
+            <Setter Property="FontFamily" Value="/Assets/Fonts/Geist-Regular.ttf#Geist" />
+        </Style>
     </Application.Styles>
+    
+    <Application.Resources>
+        <!-- Font Family Resources -->
+        <FontFamily x:Key="GeistRegular">/Assets/Fonts/Geist-Regular.ttf#Geist</FontFamily>
+        <FontFamily x:Key="GeistMedium">/Assets/Fonts/Geist-Medium.ttf#Geist</FontFamily>
+        
+        <!-- Font Weight Resources -->
+        <FontWeight x:Key="GeistRegularWeight">Normal</FontWeight>
+        <FontWeight x:Key="GeistMediumWeight">Medium</FontWeight>
+        
+        <!-- Combined Font Resources for easy use -->
+        <Style x:Key="GeistRegularText" Selector="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource GeistRegular}" />
+            <Setter Property="FontWeight" Value="{StaticResource GeistRegularWeight}" />
+        </Style>
+        
+        <Style x:Key="GeistMediumText" Selector="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource GeistMedium}" />
+            <Setter Property="FontWeight" Value="{StaticResource GeistMediumWeight}" />
+        </Style>
+        
+        <Style x:Key="GeistRegularButton" Selector="Button">
+            <Setter Property="FontFamily" Value="{StaticResource GeistRegular}" />
+            <Setter Property="FontWeight" Value="{StaticResource GeistRegularWeight}" />
+        </Style>
+        
+        <Style x:Key="GeistMediumButton" Selector="Button">
+            <Setter Property="FontFamily" Value="{StaticResource GeistMedium}" />
+            <Setter Property="FontWeight" Value="{StaticResource GeistMediumWeight}" />
+        </Style>
+    </Application.Resources>
     <TrayIcon.Icons>
       <TrayIcons>
         <TrayIcon Icon="/Assets/collective.ico" ToolTipText="Collective"/>

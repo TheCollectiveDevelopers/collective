@@ -22,6 +22,8 @@
         Source="avares://collective/Assets/drop-basket.png"
         Width="60"/>
       <TextBlock
+        FontFamily="{StaticResource GeistMedium}"
+        FontWeight="{StaticResource GeistMediumWeight}"
         Margin="0 10"
         FontSize="14"
         TextWrapping="WrapWithOverflow"

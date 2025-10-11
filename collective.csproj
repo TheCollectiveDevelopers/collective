@@ -20,5 +20,7 @@
     </PackageReference>
     <AvaloniaResource Include="Assets/collective.ico"/>
     <AvaloniaResource Include="Assets/drop-basket.png"/>
+    <AvaloniaResource Include="Assets/Fonts/Geist-Regular.ttf"/>
+    <AvaloniaResource Include="Assets/Fonts/Geist-Medium.ttf"/>
   </ItemGroup>
 </Project>

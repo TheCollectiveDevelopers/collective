@@ -23,5 +23,16 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Build completed successfully!" -ForegroundColor Green
+
+# Run the built application
+Write-Host "Starting the application..." -ForegroundColor Cyan
+$appPath = ".\Debug\appcollective.exe"
+if (Test-Path $appPath) {
+    Start-Process -FilePath $appPath -WorkingDirectory (Get-Location)
+    Write-Host "Application started!" -ForegroundColor Green
+} else {
+    Write-Host "Application executable not found at: $appPath" -ForegroundColor Yellow
+}
+
 Set-Location -Path ".."
 Read-Host "Press Enter to continue"

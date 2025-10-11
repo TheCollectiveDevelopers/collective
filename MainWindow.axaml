@@ -7,7 +7,8 @@
   Background="Transparent"
   x:Class="collective.MainWindow"
   Title="collective"
-  Classes="window">
+  Classes="window"
+  DragDrop.AllowDrop="True">
   <Border 
     CornerRadius="15" 
     Background="Black"
@@ -17,7 +18,8 @@
     Height="500"
     Width="169">
     <StackPanel
-      VerticalAlignment="Center">
+      VerticalAlignment="Center"
+      Name="EmptyScreen">
       <Image 
         Source="avares://collective/Assets/drop-basket.png"
         Width="60"/>

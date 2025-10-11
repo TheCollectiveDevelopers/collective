@@ -7,4 +7,9 @@
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
+    <TrayIcon.Icons>
+      <TrayIcons>
+        <TrayIcon Icon="/Assets/collective.ico" ToolTipText="Collective"/>
+      </TrayIcons>
+    </TrayIcon.Icons>
 </Application>

@@ -52,14 +52,26 @@ Item {
       MouseArea {
         anchors.fill: parent
         preventStealing: true
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         
-        onPressed: {
-          console.log(imageDelegate.uri)
-          imageDelegate.Drag.start(Qt.CopyAction)
+        onPressed: function(mouse) {
+          if (mouse.button === Qt.LeftButton) {
+            // Left click - open preview
+            console.log("Left clicked on image:", imageDelegate.uri)
+            if (typeof previewWindow !== 'undefined') {
+              previewWindow.showPreview(imageDelegate.uri)
+            }
+          } else if (mouse.button === Qt.RightButton) {
+            // Right click - start drag
+            console.log("Right clicked on image:", imageDelegate.uri)
+            imageDelegate.Drag.start(Qt.CopyAction)
+          }
         }
         
-        onReleased: {
-          imageDelegate.Drag.drop()
+        onReleased: function(mouse) {
+          if (mouse.button === Qt.RightButton) {
+            imageDelegate.Drag.drop()
+          }
         }
       }
     }

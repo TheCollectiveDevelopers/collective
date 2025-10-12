@@ -208,4 +208,9 @@ Window {
       }
     }
   }
+  
+  // Preview window instance
+  PreviewWindow {
+    id: previewWindow
+  }
 }

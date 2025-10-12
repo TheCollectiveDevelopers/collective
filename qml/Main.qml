@@ -109,6 +109,7 @@ Window {
       propagateComposedEvents: true
       drag.target: mainWindow
       drag.axis: Drag.XAndYAxis
+      cursorShape: isDragging ? Qt.ClosedHandCursor : Qt.OpenHandCursor
       
       onPressed: function(mouse) {
         isDragging = true

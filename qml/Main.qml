@@ -9,7 +9,7 @@ Window {
   visible: true
   title: qsTr("Collective")
 
-  // flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+  flags: Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
   color: "transparent"
 
   property bool isDragging: false

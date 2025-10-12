@@ -68,12 +68,8 @@ Item {
   DropArea{
     id: dropArea
     anchors.fill: parent
-  }
 
-  Connections{
-    target: dropArea
-    
-    function onDropped(drop: DragEvent){
+    onDropped: {
       for(const url of drop.urls){
         imageList.append({
           uri: url
@@ -81,9 +77,15 @@ Item {
       }
     }
 
-    function onEntered(drag: DragEvent){
+    onEntered: {
       drag.accept(Qt.LinkAction)
     }
   }
+
+  // Connections{
+  //   target: dropArea
+    
+    
+  // }
 
 }

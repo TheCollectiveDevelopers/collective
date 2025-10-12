@@ -11,6 +11,7 @@ Item {
     id: listView
     anchors.fill: parent
     anchors.margins: 10
+    anchors.rightMargin: 0
     visible: imageList.count > 0
     spacing: 10
     layer.enabled: true
@@ -38,6 +39,28 @@ Item {
       }
 
       source: imageDelegate.uri
+
+      Drag.dragType: Drag.Automatic
+      Drag.proposedAction: Qt.CopyAction
+      Drag.supportedActions: Qt.CopyAction
+      Drag.mimeData: {
+        "text/uri-list": imageDelegate.uri,
+        "text/plain": imageDelegate.uri
+      }
+
+      MouseArea {
+        anchors.fill: parent
+        preventStealing: true
+        
+        onPressed: {
+          console.log(imageDelegate.uri)
+          imageDelegate.Drag.start(Qt.CopyAction)
+        }
+        
+        onReleased: {
+          imageDelegate.Drag.drop()
+        }
+      }
     }
   }
 

@@ -68,24 +68,32 @@ Item {
   DropArea{
     id: dropArea
     anchors.fill: parent
-    onEntered: {
-      drag.accept(Qt.LinkAction)
-    }
-    onDropped: {
-      for(const url of drop.urls){
-        imageList.append({
-          uri: url
-        })
+    z: 1 // Ensure it's above the MouseArea
+  }
+
+  Connections{
+    target: dropArea
+    
+    function onEntered(drag: DragEvent){
+      console.log("Drag entered - hasUrls:", drag.hasUrls, "formats:", drag.formats)
+      if(drag.hasUrls) {
+        drag.accept(Qt.LinkAction)
+        console.log("Drag accepted with LinkAction")
       }
     }
 
-    
+    function onDropped(drop: DragEvent){
+      console.log("Drop event - hasUrls:", drop.hasUrls, "urls:", drop.urls)
+      if(drop.hasUrls) {
+        for(const url of drop.urls){
+          console.log("Adding URL:", url)
+          imageList.append({
+            uri: url
+          })
+        }
+        drop.accept(Qt.LinkAction)
+      }
+    }
   }
-
-  // Connections{
-  //   target: dropArea
-    
-    
-  // }
 
 }

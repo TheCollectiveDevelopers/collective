@@ -83,9 +83,9 @@ Item {
 
     function onEntered(drag: DragEvent){
       if(drag.hasUrls){
-        drag.accepted = true
+        drag.accept()
       }else{
-        drag.accepted = false
+        
       }
     }
   }

@@ -11,6 +11,7 @@ Item {
     id: listView
     anchors.fill: parent
     anchors.margins: 10
+    anchors.leftMargin: 0
     anchors.rightMargin: 0
     visible: imageList.count > 0
     spacing: 10

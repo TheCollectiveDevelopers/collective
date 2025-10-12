@@ -3,11 +3,11 @@ import Qt5Compat.GraphicalEffects
 
 Item {
   
-  ListModel{
+  ListModel {
     id: imageList
   }
 
-  ListView{
+  ListView {
     id: listView
     anchors.fill: parent
     anchors.margins: 10
@@ -25,6 +25,7 @@ Item {
     }
 
     model: imageList
+    
     delegate: AnimatedImage {
       id: imageDelegate
       width: parent.width
@@ -41,33 +42,58 @@ Item {
 
       source: imageDelegate.uri
 
-      Drag.dragType: Drag.Automatic
-      Drag.proposedAction: Qt.CopyAction
-      Drag.supportedActions: Qt.CopyAction
-      Drag.mimeData: {
-        "text/uri-list": imageDelegate.uri,
-        "text/plain": imageDelegate.uri
+      // Hover tracking property
+      property bool hovered: false
+
+      // Semi-transparent overlay for darkening on hover
+      Rectangle {
+        anchors.fill: parent
+        color: hovered ? "#66000000" : "transparent"  // Dark overlay on hover
+        radius: 12
+        z: 1
+      }
+
+      // Animate opacity on appearance
+      SequentialAnimation on opacity {
+        running: true
+        loops: 1
+        PropertyAction { target: imageDelegate; property: "opacity"; value: 0 }
+        NumberAnimation { to: 1; duration: 400; easing.type: Easing.InOutQuad }
+      }
+
+      // Animate scale on appearance for emerging effect
+      SequentialAnimation on scale {
+        running: true
+        loops: 1
+        PropertyAction { target: imageDelegate; property: "scale"; value: 0.8 }
+        NumberAnimation { to: 1; duration: 400; easing.type: Easing.InOutQuad }
       }
 
       MouseArea {
         anchors.fill: parent
         preventStealing: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        
+
+        hoverEnabled: true
+        onEntered: {
+          imageDelegate.hovered = true
+        }
+        onExited: {
+          imageDelegate.hovered = false
+        }
+
         onPressed: function(mouse) {
           if (mouse.button === Qt.LeftButton) {
-            // Left click - open preview
             console.log("Left clicked on image:", imageDelegate.uri)
             if (typeof previewWindow !== 'undefined') {
               previewWindow.showPreview(imageDelegate.uri)
             }
           } else if (mouse.button === Qt.RightButton) {
-            // Right click - start drag
             console.log("Right clicked on image:", imageDelegate.uri)
             imageDelegate.Drag.start(Qt.CopyAction)
           }
         }
-        
+
         onReleased: function(mouse) {
           if (mouse.button === Qt.RightButton) {
             imageDelegate.Drag.drop()
@@ -82,7 +108,7 @@ Item {
     spacing: 20
     id: emptyLayout
     visible: imageList.count == 0
-    
+
     Image {
       id: dragImage
       source: "qrc:/qt/qml/collective/assets/drag.png"
@@ -90,7 +116,7 @@ Item {
       height: 64
       anchors.horizontalCenter: parent.horizontalCenter
     }
-    
+
     Text {
       id: dragText
       text: "Drag and Drop"
@@ -101,27 +127,27 @@ Item {
     }
   }
 
-  DropArea{
+  DropArea {
     id: dropArea
     anchors.fill: parent
     z: 1 // Ensure it's above the MouseArea
   }
 
-  Connections{
+  Connections {
     target: dropArea
-    
-    function onEntered(drag: DragEvent){
+
+    function onEntered(drag) {
       console.log("Drag entered - hasUrls:", drag.hasUrls, "formats:", drag.formats)
-      if(drag.hasUrls) {
+      if (drag.hasUrls) {
         drag.accept(Qt.LinkAction)
         console.log("Drag accepted with LinkAction")
       }
     }
 
-    function onDropped(drop: DragEvent){
+    function onDropped(drop) {
       console.log("Drop event - hasUrls:", drop.hasUrls, "urls:", drop.urls)
-      if(drop.hasUrls) {
-        for(const url of drop.urls){
+      if (drop.hasUrls) {
+        for (const url of drop.urls) {
           console.log("Adding URL:", url)
           imageList.append({
             uri: url
@@ -131,5 +157,4 @@ Item {
       }
     }
   }
-
 }

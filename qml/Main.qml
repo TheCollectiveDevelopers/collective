@@ -16,26 +16,25 @@ Window {
   property int snapThreshold: 200 // pixels from edge to trigger snap
   property int edgePadding: 30 // padding from screen edges when snapping
 
-  // MouseArea for edge snapping only
-  MouseArea {
-    id: dragArea
-    anchors.fill: parent
-    acceptedButtons: Qt.LeftButton
-    propagateComposedEvents: true
+  // MouseArea {
+  //   id: dragArea
+  //   anchors.fill: parent
+  //   acceptedButtons: Qt.LeftButton
+  //   propagateComposedEvents: true
     
-    onPressed: function(mouse) {
-      isDragging = true
-      console.log("Mouse pressed - ready for edge snapping")
-      mouse.accepted = true
-    }
+  //   onPressed: function(mouse) {
+  //     isDragging = true
+  //     console.log("Mouse pressed - ready for edge snapping")
+  //     mouse.accepted = true
+  //   }
     
-    onReleased: function(mouse) {
-      isDragging = false
-      console.log("Mouse released - checking for edge snap at position:", mouse.x, mouse.y)
-      mouse.accepted = true
-      snapToEdges(mouse.x)
-    }
-  }
+  //   onReleased: function(mouse) {
+  //     isDragging = false
+  //     console.log("Mouse released - checking for edge snap at position:", mouse.x, mouse.y)
+  //     mouse.accepted = true
+  //     snapToEdges(mouse.x)
+  //   }
+  // }
 
   // Function to snap window to screen edges based on mouse position
   function snapToEdges(mouseX) {
@@ -96,8 +95,41 @@ Window {
     border.color: "#22ffffff"
     border.width: 0.5
 
-    ImageList{
+    Row {
       anchors.fill: parent
+      ImageList{
+        width: parent.width - 10
+        height: parent.height
+      }
+
+      MouseArea{
+        id: resizeHandle
+        width: 10
+        height: parent.height
+        cursorShape: Qt.SizeHorCursor
+        // drag.target: rect
+        drag.axis: Drag.XAxis
+
+        property bool isResizing: false
+        property int startX: 0
+
+        onPressed: (mouse) => {
+          isResizing = true
+          startX = mouse.x
+          console.log("pressed")
+        }
+
+        onPositionChanged: (mouse) => {
+          if(isResizing){
+            var deltaX = mouse.x - startX
+            rect.width += deltaX
+          }
+        }
+
+        onReleased: (mouse) => {
+          isResizing = false
+        }
+      }
     }
   }
 }

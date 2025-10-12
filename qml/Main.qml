@@ -15,6 +15,12 @@ Window {
   property bool isDragging: false
   property int snapThreshold: 200 // pixels from edge to trigger snap
   property int edgePadding: 30 // padding from screen edges when snapping
+  
+  // Check if window is snapped to left edge
+  property bool isSnappedToLeft: Math.abs(x - edgePadding) < 5
+  
+  // Check if window is snapped to right edge
+  property bool isSnappedToRight: Math.abs(x - (Screen.desktopAvailableWidth - width - edgePadding)) < 5
 
   // MouseArea {
   //   id: dragArea
@@ -95,34 +101,103 @@ Window {
     border.color: "#22ffffff"
     border.width: 0.5
 
+    // Add drag functionality to the main rectangle
+    MouseArea {
+      id: dragArea
+      anchors.fill: parent
+      acceptedButtons: Qt.LeftButton
+      propagateComposedEvents: true
+      drag.target: mainWindow
+      drag.axis: Drag.XAndYAxis
+      
+      onPressed: function(mouse) {
+        isDragging = true
+        console.log("Mouse pressed - ready for edge snapping")
+        mouse.accepted = true
+      }
+      
+      onReleased: function(mouse) {
+        isDragging = false
+        console.log("Mouse released - checking for edge snap at position:", mouse.x, mouse.y)
+        mouse.accepted = true
+        snapToEdges(mouse.x)
+      }
+    }
+
     Row {
       anchors.fill: parent
-      ImageList{
-        width: parent.width - 10
-        height: parent.height
-      }
-
+      
+      // Left resize handle - only active when snapped to right
       MouseArea{
-        id: resizeHandle
+        id: leftResizeHandle
         width: 10
         height: parent.height
         cursorShape: Qt.SizeHorCursor
-        // drag.target: rect
         drag.axis: Drag.XAxis
+        enabled: isSnappedToRight
 
         property bool isResizing: false
         property int startX: 0
 
         onPressed: (mouse) => {
-          isResizing = true
-          startX = mouse.x
-          console.log("pressed")
+          if (isSnappedToRight) {
+            isResizing = true
+            startX = mouse.x
+            console.log("Left resize pressed")
+          }
         }
 
         onPositionChanged: (mouse) => {
-          if(isResizing){
+          if(isResizing && isSnappedToRight){
             var deltaX = mouse.x - startX
-            rect.width += deltaX
+            var newWidth = rect.width - deltaX
+            if (newWidth > 100) { // Minimum width constraint
+              rect.width = newWidth
+              // Keep window snapped to right edge
+              mainWindow.x = Screen.desktopAvailableWidth - rect.width - edgePadding
+            }
+          }
+        }
+
+        onReleased: (mouse) => {
+          isResizing = false
+        }
+      }
+
+      ImageList{
+        width: parent.width - 20 // Account for both resize handles
+        height: parent.height
+      }
+
+      // Right resize handle - only active when snapped to left
+      MouseArea{
+        id: rightResizeHandle
+        width: 10
+        height: parent.height
+        cursorShape: Qt.SizeHorCursor
+        drag.axis: Drag.XAxis
+        enabled: isSnappedToLeft
+
+        property bool isResizing: false
+        property int startX: 0
+
+        onPressed: (mouse) => {
+          if (isSnappedToLeft) {
+            isResizing = true
+            startX = mouse.x
+            console.log("Right resize pressed")
+          }
+        }
+
+        onPositionChanged: (mouse) => {
+          if(isResizing && isSnappedToLeft){
+            var deltaX = mouse.x - startX
+            var newWidth = rect.width + deltaX
+            if (newWidth > 100) { // Minimum width constraint
+              rect.width = newWidth
+              // Keep window snapped to left edge
+              mainWindow.x = edgePadding
+            }
           }
         }
 

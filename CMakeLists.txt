@@ -16,7 +16,8 @@ qt_add_qml_module(appcollective
     URI collective
     VERSION 1.0
     QML_FILES
-        Main.qml
+        qml/Main.qml
+        qml/ImageList.qml
     RESOURCES
         assets/drag.png
 )

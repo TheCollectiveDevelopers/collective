@@ -80,6 +80,14 @@ Item {
         })
       }
     }
+
+    function onEntered(drag: DragEvent){
+      if(drag.hasUrls){
+        drag.accepted = true
+      }else{
+        drag.accepted = false
+      }
+    }
   }
 
 }

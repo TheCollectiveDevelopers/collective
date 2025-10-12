@@ -82,11 +82,7 @@ Item {
     }
 
     function onEntered(drag: DragEvent){
-      if(drag.hasUrls){
-        drag.accept()
-      }else{
-        
-      }
+      drag.accept(Qt.LinkAction)
     }
   }
 

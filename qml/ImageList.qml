@@ -58,7 +58,7 @@ Item {
         running: true
         loops: 1
         PropertyAction { target: imageDelegate; property: "opacity"; value: 0 }
-        NumberAnimation { to: 1; duration: 400; easing.type: Easing.InOutQuad }
+        NumberAnimation { to: 1; duration: 100; easing.type: Easing.InOutQuad }
       }
 
       // Animate scale on appearance for emerging effect
@@ -66,7 +66,7 @@ Item {
         running: true
         loops: 1
         PropertyAction { target: imageDelegate; property: "scale"; value: 0.8 }
-        NumberAnimation { to: 1; duration: 400; easing.type: Easing.InOutQuad }
+        NumberAnimation { to: 1; duration: 100; easing.type: Easing.InOutQuad }
       }
 
       MouseArea {
@@ -85,8 +85,16 @@ Item {
         onPressed: function(mouse) {
           if (mouse.button === Qt.LeftButton) {
             console.log("Left clicked on image:", imageDelegate.uri)
-            if (typeof previewWindow !== 'undefined') {
-              previewWindow.showPreview(imageDelegate.uri)
+            var previewWindowComponent = Qt.createComponent("PreviewWindow.qml")
+
+            if(previewWindowComponent.status === Component.Ready){
+              var previewWindow = previewWindowComponent.createObject(null)
+              if(previewWindow) {
+                previewWindow.uri = imageDelegate.uri
+                previewWindow.width = imageDelegate.width * 1.5;
+                previewWindow.height = imageDelegate.height * 1.5;
+                previewWindow.show()
+              }
             }
           } else if (mouse.button === Qt.RightButton) {
             console.log("Right clicked on image:", imageDelegate.uri)

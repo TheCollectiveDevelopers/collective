@@ -2,8 +2,8 @@ import QtQuick
 
 Window {
   id: mainWindow
-  width: rect.width
-  height: rect.height
+  width: 200
+  height: 500
   x: 30
   y: (Screen.desktopAvailableHeight - height) / 2
   visible: true
@@ -92,9 +92,7 @@ Window {
 
   Rectangle {
     id: rect
-    width: 200
-    height: 500
-
+    anchors.fill: parent
     radius: 20
     color: "#1A1A1A"
 
@@ -142,26 +140,8 @@ Window {
 
         onPressed: (mouse) => {
           if (isSnappedToRight) {
-            isResizing = true
-            startX = mouse.x
-            console.log("Left resize pressed")
+            mainWindow.startSystemResize(Qt.LeftEdge)
           }
-        }
-
-        onPositionChanged: (mouse) => {
-          if(isResizing && isSnappedToRight){
-            var deltaX = mouse.x - startX
-            var newWidth = rect.width - deltaX
-            if (newWidth > 100) { // Minimum width constraint
-              rect.width = newWidth
-              // Keep window snapped to right edge
-              mainWindow.x = Screen.desktopAvailableWidth - rect.width - edgePadding
-            }
-          }
-        }
-
-        onReleased: (mouse) => {
-          isResizing = false
         }
       }
 
@@ -176,34 +156,12 @@ Window {
         width: 10
         height: parent.height
         cursorShape: Qt.SizeHorCursor
-        drag.axis: Drag.XAxis
         enabled: isSnappedToLeft
-
-        property bool isResizing: false
-        property int startX: 0
 
         onPressed: (mouse) => {
           if (isSnappedToLeft) {
-            isResizing = true
-            startX = mouse.x
-            console.log("Right resize pressed")
+            mainWindow.startSystemResize(Qt.RightEdge)
           }
-        }
-
-        onPositionChanged: (mouse) => {
-          if(isResizing && isSnappedToLeft){
-            var deltaX = mouse.x - startX
-            var newWidth = rect.width + deltaX
-            if (newWidth > 100) { // Minimum width constraint
-              rect.width = newWidth
-              // Keep window snapped to left edge
-              mainWindow.x = edgePadding
-            }
-          }
-        }
-
-        onReleased: (mouse) => {
-          isResizing = false
         }
       }
     }

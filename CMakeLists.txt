@@ -21,6 +21,10 @@ qt_add_qml_module(appcollective
         qml/PreviewWindow.qml
     RESOURCES
         assets/drag.png
+        assets/lock-white.png
+        assets/refresh-white.png
+        assets/x-white.png
+        assets/zoom-white.png
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

@@ -15,7 +15,7 @@ Window{
   Rectangle{
     id: previewImageRectangle
     anchors.fill: parent
-    color: "#1a1a1a"
+    color: "black"
     radius: 17
     
     AnimatedImage{
@@ -35,37 +35,66 @@ Window{
       source: previewWindow.uri
     }
   }
-  
-  Rectangle{
-    width: 15
-    height: 15
-    color: "#E9524A"
-    radius: 10
-    x: parent.width - 30
-    y: parent.y + 10
 
-    MouseArea{
+
+  Rectangle{
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: parent.top
+    height: 30
+    width: childrenRect.width + 20
+    bottomLeftRadius: 40
+    bottomRightRadius: 40
+
+    color: "black"
+
+    MouseArea {
+      id: moveArea
       anchors.fill: parent
-      cursorShape: Qt.ArrowCursor
-      onClicked: {
-        previewWindow.close()
+      anchors.margins: resizeMargin
+      propagateComposedEvents: true
+      
+      onPressed: {
+        previewWindow.startSystemMove()
+      }
+    }
+
+    Row{
+      spacing: 10
+      anchors.centerIn: parent
+
+      Image{
+        width: 15
+        height: 15
+        visible: false
+        source: "qrc:/qt/qml/collective/assets/refresh-white.png"
+      }
+
+      Text{
+        text: previewWindow.uri.split("/").pop().slice(0, 20)
+        color: "#efefef"
+        font.pixelSize: 12
+        font.weight: Font.Bold
+      }
+
+      Image{
+        width: 15
+        height: 15
+        source: "qrc:/qt/qml/collective/assets/x-white.png"
+        MouseArea{
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+
+          onClicked: {
+            previewWindow.close()
+          }
+        }
       }
     }
   }
 
 
   // Move area - center of window
-  MouseArea {
-    id: moveArea
-    anchors.fill: parent
-    anchors.margins: resizeMargin
-    cursorShape: Qt.SizeAllCursor
-    propagateComposedEvents: true
-    
-    onPressed: {
-      previewWindow.startSystemMove()
-    }
-  }
+  
 
   // Top-left corner resize
   MouseArea {

@@ -31,6 +31,8 @@ Item {
       width: parent.width
       fillMode: Image.PreserveAspectFit
       required property string uri
+      required property int index
+      property Window previewWindow: null
       layer.enabled: true
       layer.effect: OpacityMask {
         maskSource: Rectangle {
@@ -88,7 +90,7 @@ Item {
             var previewWindowComponent = Qt.createComponent("PreviewWindow.qml")
 
             if(previewWindowComponent.status === Component.Ready){
-              var previewWindow = previewWindowComponent.createObject(null)
+              previewWindow = previewWindowComponent.createObject(null)
               if(previewWindow) {
                 previewWindow.uri = imageDelegate.uri
                 previewWindow.width = imageDelegate.width * 1.5;
@@ -98,15 +100,20 @@ Item {
             }
           } else if (mouse.button === Qt.RightButton) {
             console.log("Right clicked on image:", imageDelegate.uri)
-            imageDelegate.Drag.start(Qt.CopyAction)
+            for(var i=0; i<imageList.count; i++){
+              if(imageList.get(i).index === imageDelegate.index){
+                console.log(i)
+                if(previewWindow){
+                  previewWindow.close()
+                  previewWindow = null
+                }
+                imageList.remove(i, 1)
+                break
+              }
+            }
           }
         }
 
-        onReleased: function(mouse) {
-          if (mouse.button === Qt.RightButton) {
-            imageDelegate.Drag.drop()
-          }
-        }
       }
     }
   }
@@ -158,7 +165,8 @@ Item {
         for (const url of drop.urls) {
           console.log("Adding URL:", url)
           imageList.append({
-            uri: url
+            uri: url,
+            index: imageList.count
           })
         }
         drop.accept(Qt.LinkAction)

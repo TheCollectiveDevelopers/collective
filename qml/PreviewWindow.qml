@@ -37,36 +37,49 @@ Window{
   }
 
 
+  
   Rectangle{
+    id: titleBar
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.top: parent.top
     height: 30
-    width: childrenRect.width + 20
+    width: contentRow.implicitWidth + 20
     bottomLeftRadius: 40
     bottomRightRadius: 40
 
+    property bool hovering: false
+
     color: "black"
 
-    MouseArea {
-      id: moveArea
-      anchors.fill: parent
-      anchors.margins: resizeMargin
-      propagateComposedEvents: true
-      
-      onPressed: {
-        previewWindow.startSystemMove()
-      }
+    Behavior on width {
+      NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
     }
 
     Row{
+      id: contentRow
       spacing: 10
-      anchors.centerIn: parent
+      x: 10
+      anchors.verticalCenter: parent.verticalCenter
 
       Image{
         width: 15
         height: 15
-        visible: false
+        visible: titleBar.hovering
         source: "qrc:/qt/qml/collective/assets/refresh-white.png"
+      }
+
+      Image{
+        width: 15
+        height: 15
+        visible: titleBar.hovering
+        source: "qrc:/qt/qml/collective/assets/lock-white.png"
+      }
+
+      Image{
+        width: 15
+        height: 15
+        visible: titleBar.hovering
+        source: "qrc:/qt/qml/collective/assets/zoom-white.png"
       }
 
       Text{
@@ -74,6 +87,7 @@ Window{
         color: "#efefef"
         font.pixelSize: 12
         font.weight: Font.Bold
+        visible: !titleBar.hovering
       }
 
       Image{
@@ -92,7 +106,28 @@ Window{
     }
   }
 
+  MouseArea {
+    id: moveArea
+    anchors.left: previewWindow.left
+    anchors.right: previewWindow.right
+    anchors.top: previewWindow.top
+    height: 30
+    width: previewWindow.width
+    anchors.margins: resizeMargin
+    propagateComposedEvents: true
+    hoverEnabled: true
+    onPressed: {
+       previewWindow.startSystemMove()
+    }
 
+    onEntered: {
+      titleBar.hovering = true
+    }
+
+    onExited: {
+      titleBar.hovering = false
+    }
+  }
   // Move area - center of window
   
 

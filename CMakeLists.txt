@@ -16,7 +16,21 @@ qt_add_qml_module(appcollective
     URI collective
     VERSION 1.0
     QML_FILES
-        Main.qml
+        qml/Main.qml
+        qml/ImageList.qml
+        qml/PreviewWindow.qml
+    RESOURCES
+        assets/drag.png
+        assets/lock-white.png
+        assets/lock-yellow.png
+        assets/refresh-white.png
+        assets/refresh-yellow.png
+        assets/x-white.png
+        assets/zoom-white.png
+        assets/drop-white.png
+        assets/drop-yellow.png
+        assets/reflect-white.png
+        assets/reflect-yellow.png
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -27,7 +41,7 @@ set_target_properties(appcollective PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+   # WIN32_EXECUTABLE TRUE
 )
 
 target_link_libraries(appcollective

@@ -29,6 +29,7 @@ Item {
     delegate: AnimatedImage {
       id: imageDelegate
       width: parent.width
+      sourceSize.width: 300
       fillMode: Image.PreserveAspectFit
       required property string uri
       required property int index

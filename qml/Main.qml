@@ -5,7 +5,7 @@ Window {
   width: 200
   height: 500
   minimumWidth: 100
-  maximumWidth: 400
+  maximumWidth: 300
   x: 30
   y: (Screen.desktopAvailableHeight - height) / 2
   visible: true

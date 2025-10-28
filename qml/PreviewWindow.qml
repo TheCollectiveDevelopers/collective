@@ -125,6 +125,7 @@ Window{
     height: 30
     width: contentRow.implicitWidth + 20
     radius: 20
+    z: 10
     property bool hovering: false
 
     color: "#1a1a1a"

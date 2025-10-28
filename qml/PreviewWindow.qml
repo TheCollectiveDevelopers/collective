@@ -17,6 +17,8 @@ Window{
 
   property bool locked: false
   property bool isRotating: false
+  property bool isOpacity: false
+  property bool isMirrored: false
 
   Rectangle{
     id: previewImageRectangle
@@ -60,6 +62,7 @@ Window{
       height: previewImageRectangle.updatedImageHeight * previewImageRectangle.globalScalingFactor
       rotation: previewImageRectangle.globalRotationAngle
 
+      mirror: previewWindow.isMirrored
       fillMode: Image.PreserveAspectCrop
       smooth: true
 
@@ -96,7 +99,11 @@ Window{
       
       onWheel: {
         var scrollAmount = wheel.angleDelta.y / 120
-        previewImageRectangle.globalScalingFactor += scrollAmount * 0.2
+        if(previewWindow.isOpacity){
+          previewImageRectangle.opacity = Math.max(Math.min(previewImageRectangle.opacity + scrollAmount * 0.2, 1), 0.2)
+        }else{
+          previewImageRectangle.globalScalingFactor = Math.max(previewImageRectangle.globalScalingFactor + scrollAmount * 0.2, 0.07)
+        }    
       }
 
       onPositionChanged: {
@@ -131,6 +138,54 @@ Window{
       spacing: 10
       x: 10
       anchors.verticalCenter: parent.verticalCenter
+
+      Image{
+        width: 15
+        height: 15
+        visible: titleBar.hovering
+        source: "qrc:/qt/qml/collective/assets/reflect-white.png"
+
+        MouseArea{
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+
+          onClicked: {
+            previewWindow.isMirrored = !previewWindow.isMirrored
+          }
+        }
+      }
+
+      Image{
+        width: 15
+        height: 15
+        visible: titleBar.hovering && !previewWindow.isOpacity
+        source: "qrc:/qt/qml/collective/assets/drop-white.png"
+
+        MouseArea{
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+
+          onClicked: {
+            previewWindow.isOpacity = true
+          }
+        }
+      }
+
+      Image{
+        width: 15
+        height: 15
+        visible: previewWindow.isOpacity
+        source: "qrc:/qt/qml/collective/assets/drop-yellow.png"
+
+        MouseArea{
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+
+          onClicked: {
+            previewWindow.isOpacity = false
+          }
+        }
+      }
 
       Image{
         width: 15

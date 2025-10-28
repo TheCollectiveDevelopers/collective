@@ -12,47 +12,118 @@ Window{
   property int resizeMargin: 8
   property int cornerSize: 16
 
+  property int imageWidth: 400
+  property int imageHeight: 400
+
+  property bool locked: false
+  property bool isRotating: false
+
   Rectangle{
     id: previewImageRectangle
     anchors.fill: parent
-    color: "black"
+    color: "#1a1a1a"
+    
     radius: 17
+
+    layer.enabled: true
+    layer.effect: OpacityMask {
+      maskSource: Rectangle {
+        width: previewImageRectangle.width
+        height: previewImageRectangle.height
+        radius: 17
+      }
+    }
+    property real updatedImageWidth: 400
+    property real updatedImageHeight: 400
+    property real globalScalingFactor: 1
+    property real globalRotationAngle: 0
+
+    function updateImageSize(){
+      var scalingFactor = 0
+
+      if(previewImageRectangle.width > previewImageRectangle.height){
+        scalingFactor = (previewImageRectangle.width)/imageWidth
+      }else{
+        scalingFactor = (previewImageRectangle.height)/imageHeight
+      }
+      previewImageRectangle.updatedImageWidth = imageWidth * scalingFactor
+      previewImageRectangle.updatedImageHeight = imageHeight * scalingFactor
+
+    }
+
+    onWidthChanged: updateImageSize()
+    onHeightChanged: updateImageSize()
     
     AnimatedImage{
       id: previewImage
-      anchors.fill: parent
-      anchors.margins: 5
+      width: previewImageRectangle.updatedImageWidth * previewImageRectangle.globalScalingFactor
+      height: previewImageRectangle.updatedImageHeight * previewImageRectangle.globalScalingFactor
+      rotation: previewImageRectangle.globalRotationAngle
+
       fillMode: Image.PreserveAspectCrop
-      layer.enabled: true
-      layer.effect: OpacityMask {
-        maskSource: Rectangle {
-          width: previewImage.width
-          height: previewImage.height
-          radius: 12
-        }
-      }
+      smooth: true
 
       source: previewWindow.uri
     }
+   
+    MouseArea{
+      id: imageMoveArea
+      anchors.fill: parent
+      propagateComposedEvents: true
+      drag.target: !previewWindow.isRotating ? previewImage : undefined
+      enabled: !previewWindow.locked
+
+      property real startAngle: 0
+      property real startGlobalRotation: 0
+        
+      function angleFromCenter(x, y) {
+        var centerX = width / 2
+        var centerY = height / 2
+        return Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
+      }
+
+      onPressed: {
+        startAngle = angleFromCenter(mouseX, mouseY)
+        startGlobalRotation = previewImageRectangle.globalRotationAngle
+      }
+
+      onDoubleClicked: {
+        previewImage.x = 0
+        previewImage.y = 0
+        previewImageRectangle.globalScalingFactor = 1
+        previewImageRectangle.globalRotationAngle = 0
+      }
+      
+      onWheel: {
+        var scrollAmount = wheel.angleDelta.y / 120
+        previewImageRectangle.globalScalingFactor += scrollAmount * 0.2
+      }
+
+      onPositionChanged: {
+        if(pressed && previewWindow.isRotating){
+          var currentAngle = angleFromCenter(mouseX, mouseY)
+          var angleDelta = currentAngle - startAngle
+
+          previewImageRectangle.globalRotationAngle = startGlobalRotation + angleDelta
+        }
+      }
+    }
+    
   }
-
-
-  
   Rectangle{
     id: titleBar
-    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.margins: 5
     anchors.top: parent.top
+    anchors.right: parent.right
     height: 30
     width: contentRow.implicitWidth + 20
-    bottomLeftRadius: 40
-    bottomRightRadius: 40
-
+    radius: 20
     property bool hovering: false
 
-    color: "black"
+    color: "#1a1a1a"
 
     Behavior on width {
-      NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
+      NumberAnimation { duration: 300; easing.type: Easing.InOutQuad }
     }
 
     Row{
@@ -64,30 +135,65 @@ Window{
       Image{
         width: 15
         height: 15
-        visible: titleBar.hovering
+        visible: titleBar.hovering && !previewWindow.isRotating
         source: "qrc:/qt/qml/collective/assets/refresh-white.png"
+
+        MouseArea{
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+
+          onClicked: {
+            previewWindow.isRotating = true
+          }
+        }
       }
 
       Image{
         width: 15
         height: 15
-        visible: titleBar.hovering
+        visible: previewWindow.isRotating
+        source: "qrc:/qt/qml/collective/assets/refresh-yellow.png"
+
+        MouseArea{
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+
+          onClicked: {
+            previewWindow.isRotating = false
+          }
+        }
+      }
+
+      Image{
+        width: 15
+        height: 15
+        visible: titleBar.hovering && !previewWindow.locked
         source: "qrc:/qt/qml/collective/assets/lock-white.png"
+
+        MouseArea{
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+
+          onClicked: {
+            previewWindow.locked = true
+          }
+        }
       }
 
       Image{
         width: 15
         height: 15
-        visible: titleBar.hovering
-        source: "qrc:/qt/qml/collective/assets/zoom-white.png"
-      }
+        visible: previewWindow.locked
+        source: "qrc:/qt/qml/collective/assets/lock-yellow.png"
 
-      Text{
-        text: previewWindow.uri.split("/").pop().slice(0, 20)
-        color: "#efefef"
-        font.pixelSize: 12
-        font.weight: Font.Bold
-        visible: !titleBar.hovering
+        MouseArea{
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+
+          onClicked: {
+            previewWindow.locked = false
+          }
+        }
       }
 
       Image{
@@ -117,7 +223,7 @@ Window{
     propagateComposedEvents: true
     hoverEnabled: true
     onPressed: {
-       previewWindow.startSystemMove()
+      if(!previewWindow.locked) previewWindow.startSystemMove()
     }
 
     onEntered: {
@@ -141,7 +247,7 @@ Window{
     cursorShape: Qt.SizeFDiagCursor
     
     onPressed: {
-      previewWindow.startSystemResize(Qt.TopEdge | Qt.LeftEdge)
+      if(!previewWindow.locked) previewWindow.startSystemResize(Qt.TopEdge | Qt.LeftEdge)
     }
   }
 
@@ -155,7 +261,7 @@ Window{
     cursorShape: Qt.SizeBDiagCursor
     
     onPressed: {
-      previewWindow.startSystemResize(Qt.TopEdge | Qt.RightEdge)
+      if(!previewWindow.locked) previewWindow.startSystemResize(Qt.TopEdge | Qt.RightEdge)
     }
   }
 
@@ -169,7 +275,7 @@ Window{
     cursorShape: Qt.SizeBDiagCursor
     
     onPressed: {
-      previewWindow.startSystemResize(Qt.BottomEdge | Qt.LeftEdge)
+      if(!previewWindow.locked) previewWindow.startSystemResize(Qt.BottomEdge | Qt.LeftEdge)
     }
   }
 
@@ -183,7 +289,7 @@ Window{
     cursorShape: Qt.SizeFDiagCursor
     
     onPressed: {
-      previewWindow.startSystemResize(Qt.BottomEdge | Qt.RightEdge)
+      if(!previewWindow.locked) previewWindow.startSystemResize(Qt.BottomEdge | Qt.RightEdge)
     }
   }
 
@@ -199,7 +305,7 @@ Window{
     cursorShape: Qt.SizeVerCursor
     
     onPressed: {
-      previewWindow.startSystemResize(Qt.TopEdge)
+      if(!previewWindow.locked) previewWindow.startSystemResize(Qt.TopEdge)
     }
   }
 
@@ -215,7 +321,7 @@ Window{
     cursorShape: Qt.SizeVerCursor
     
     onPressed: {
-      previewWindow.startSystemResize(Qt.BottomEdge)
+      if(!previewWindow.locked) previewWindow.startSystemResize(Qt.BottomEdge)
     }
   }
 
@@ -231,7 +337,7 @@ Window{
     cursorShape: Qt.SizeHorCursor
     
     onPressed: {
-      previewWindow.startSystemResize(Qt.LeftEdge)
+      if(!previewWindow.locked) previewWindow.startSystemResize(Qt.LeftEdge)
     }
   }
 
@@ -247,7 +353,7 @@ Window{
     cursorShape: Qt.SizeHorCursor
     
     onPressed: {
-      previewWindow.startSystemResize(Qt.RightEdge)
+      if(!previewWindow.locked) previewWindow.startSystemResize(Qt.RightEdge)
     }
   }
 }

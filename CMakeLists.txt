@@ -22,7 +22,9 @@ qt_add_qml_module(appcollective
     RESOURCES
         assets/drag.png
         assets/lock-white.png
+        assets/lock-yellow.png
         assets/refresh-white.png
+        assets/refresh-yellow.png
         assets/x-white.png
         assets/zoom-white.png
 )

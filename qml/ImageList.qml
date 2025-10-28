@@ -95,6 +95,8 @@ Item {
                 previewWindow.uri = imageDelegate.uri
                 previewWindow.width = imageDelegate.width * 1.5;
                 previewWindow.height = imageDelegate.height * 1.5;
+                previewWindow.imageWidth = imageDelegate.width * 1.5;
+                previewWindow.imageHeight = imageDelegate.height * 1.5;
                 previewWindow.show()
               }
             }

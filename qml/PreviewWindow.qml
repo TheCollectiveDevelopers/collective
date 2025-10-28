@@ -96,14 +96,14 @@ Window{
         previewImageRectangle.globalScalingFactor = 1
         previewImageRectangle.globalRotationAngle = 0
       }
-      
+
       onWheel: {
         var scrollAmount = wheel.angleDelta.y / 120
         if(previewWindow.isOpacity){
           previewImageRectangle.opacity = Math.max(Math.min(previewImageRectangle.opacity + scrollAmount * 0.2, 1), 0.2)
         }else{
           previewImageRectangle.globalScalingFactor = Math.max(previewImageRectangle.globalScalingFactor + scrollAmount * 0.2, 0.07)
-        }    
+        }
       }
 
       onPositionChanged: {
@@ -115,7 +115,6 @@ Window{
         }
       }
     }
-    
   }
   Rectangle{
     id: titleBar

@@ -1,11 +1,13 @@
 import QtQuick
+import Qt.labs.platform
+import QtQuick.Layouts
 
 Window {
   id: mainWindow
   width: 200
   height: 500
-  minimumWidth: 100
-  maximumWidth: 300
+  minimumWidth: 200
+  maximumWidth: 400
   x: 30
   y: (Screen.desktopAvailableHeight - height) / 2
   visible: true
@@ -43,7 +45,28 @@ Window {
   //     snapToEdges(mouse.x)
   //   }
   // }
+  SystemTrayIcon{
+    visible: true
+    tooltip: "Collective"
+    icon.source: "qrc:/qt/qml/collective/assets/icon.png"
 
+    onActivated: (reason) => {
+      if(reason === SystemTrayIcon.Trigger){
+        mainWindow.show()
+      }
+    }
+  }
+
+  Shortcut{
+    sequence: "Alt+C"
+    onActivated: (reason) => {
+      if(mainWindow.visible){
+        mainWindow.hide()
+      }else{
+        mainWindow.show()
+      }
+    }
+  }
   // Function to snap window to screen edges based on mouse position
   function snapToEdges(mouseX) {
     var screenWidth = Screen.desktopAvailableWidth
@@ -91,86 +114,100 @@ Window {
     duration: 500
     easing.type: Easing.OutCubic
   }
-
-  Rectangle {
-    id: rect
-    anchors.fill: parent
-    radius: 20
-    color: "#1A1A1A"
-
-    border.color: "#22ffffff"
-    border.width: 0.5
-
-    // Add drag functionality to the main rectangle
-    MouseArea {
-      id: dragArea
-      anchors.fill: parent
-      acceptedButtons: Qt.LeftButton
-      propagateComposedEvents: true
-      drag.target: mainWindow
-      drag.axis: Drag.XAndYAxis
-      cursorShape: isDragging ? Qt.ClosedHandCursor : Qt.OpenHandCursor
-      
-      onPressed: function(mouse) {
-        isDragging = true
-        console.log("Mouse pressed - ready for edge snapping")
-        mouse.accepted = true
-      }
-      
-      onReleased: function(mouse) {
-        isDragging = false
-        console.log("Mouse released - checking for edge snap at position:", mouse.x, mouse.y)
-        mouse.accepted = true
-        snapToEdges(mouse.x)
-      }
-    }
-
-    Row {
-      anchors.fill: parent
-      
-      // Left resize handle - only active when snapped to right
-      MouseArea{
-        id: leftResizeHandle
-        width: 10
-        height: parent.height
-        cursorShape: Qt.SizeHorCursor
-        drag.axis: Drag.XAxis
-        enabled: isSnappedToRight
-
-        property bool isResizing: false
-        property int startX: 0
-
-        onPressed: (mouse) => {
-          if (isSnappedToRight) {
-            mainWindow.startSystemResize(Qt.LeftEdge)
-          }
-        }
-      }
-
-      ImageList{
-        width: parent.width - 20 // Account for both resize handles
-        height: parent.height
-      }
-
-      // Right resize handle - only active when snapped to left
-      MouseArea{
-        id: rightResizeHandle
-        width: 10
-        height: parent.height
-        cursorShape: Qt.SizeHorCursor
-        enabled: isSnappedToLeft
-
-        onPressed: (mouse) => {
-          if (isSnappedToLeft) {
-            mainWindow.startSystemResize(Qt.RightEdge)
-          }
-        }
-      }
-    }
-  }
   
-  // Preview window instance
-  PreviewWindow {
-    id: previewWindow
+  RowLayout{
+    anchors.fill: parent
+    spacing: 10
+    //anchors.verticalCenter: parent.verticalCenter
+
+    Rectangle {
+      id: rect
+      radius: 20
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      color: "#1A1A1A"
+
+      border.color: "#22ffffff"
+      border.width: 0.5
+
+      // Add drag functionality to the main rectangle
+      MouseArea {
+        id: dragArea
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton
+        propagateComposedEvents: true
+        drag.target: mainWindow
+        drag.axis: Drag.XAndYAxis
+        cursorShape: isDragging ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+        
+        onPressed: function(mouse) {
+          isDragging = true
+          console.log("Mouse pressed - ready for edge snapping")
+          mouse.accepted = true
+        }
+        
+        onReleased: function(mouse) {
+          isDragging = false
+          console.log("Mouse released - checking for edge snap at position:", mouse.x, mouse.y)
+          mouse.accepted = true
+          snapToEdges(mouse.x)
+        }
+      }
+
+      Row {
+        anchors.fill: parent
+        
+        // Left resize handle - only active when snapped to right
+        MouseArea{
+          id: leftResizeHandle
+          width: 10
+          height: parent.height
+          cursorShape: Qt.SizeHorCursor
+          drag.axis: Drag.XAxis
+          enabled: isSnappedToRight
+
+          property bool isResizing: false
+          property int startX: 0
+
+          onPressed: (mouse) => {
+            if (isSnappedToRight) {
+              mainWindow.startSystemResize(Qt.LeftEdge)
+            }
+          }
+        }
+
+        ImageList{
+          width: parent.width - 20 // Account for both resize handles
+          height: parent.height
+        }
+
+        // Right resize handle - only active when snapped to left
+        MouseArea{
+          id: rightResizeHandle
+          width: 10
+          height: parent.height
+          cursorShape: Qt.SizeHorCursor
+          enabled: isSnappedToLeft
+
+          onPressed: (mouse) => {
+            if (isSnappedToLeft) {
+              mainWindow.startSystemResize(Qt.RightEdge)
+            }
+          }
+        }
+      }
+    }
+
+    Rectangle{
+      width: 40
+      height: 300
+      color: "#1a1a1a"
+      radius: 10
+
+      border.width: 0.5
+      border.color: "#22ffffff"
+    }
   }
+
+  
 }

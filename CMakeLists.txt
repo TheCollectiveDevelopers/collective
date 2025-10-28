@@ -4,7 +4,7 @@ project(collective VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick Widgets)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -20,6 +20,7 @@ qt_add_qml_module(appcollective
         qml/ImageList.qml
         qml/PreviewWindow.qml
     RESOURCES
+        assets/icon.png
         assets/drag.png
         assets/lock-white.png
         assets/lock-yellow.png
@@ -46,6 +47,7 @@ set_target_properties(appcollective PROPERTIES
 
 target_link_libraries(appcollective
     PRIVATE Qt6::Quick
+    PRIVATE Qt6::Widgets
 )
 
 include(GNUInstallDirs)

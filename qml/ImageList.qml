@@ -2,7 +2,7 @@ import QtQuick
 import Qt5Compat.GraphicalEffects
 
 Item {
-  
+
   ListModel {
     id: imageList
   }
@@ -98,8 +98,8 @@ Item {
                 previewWindow.height = imageDelegate.height * 1.5;
                 previewWindow.imageWidth = imageDelegate.width * 1.5;
                 previewWindow.imageHeight = imageDelegate.height * 1.5;
-                previewWindow.minimumWidth = Math.max(imageDelegate.width * 0.4, 130);
-                previewWindow.minimumHeight = Math.max(imageDelegate.height * 0.4, 130);
+                previewWindow.minimumWidth = Math.max(imageDelegate.width * 0.4, 150);
+                previewWindow.minimumHeight = Math.max(imageDelegate.height * 0.4, 150);
                 previewWindow.show()
               }
             }

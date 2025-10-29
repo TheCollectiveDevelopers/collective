@@ -19,6 +19,9 @@ Window {
   property bool isDragging: false
   property int snapThreshold: 200 // pixels from edge to trigger snap
   property int edgePadding: 30 // padding from screen edges when snapping
+
+  property int currentImageListKey: 0
+  property var imageLists: []
   
   // Check if window is snapped to left edge
   property bool isSnappedToLeft: Math.abs(x - edgePadding) < 5
@@ -45,6 +48,9 @@ Window {
   //     snapToEdges(mouse.x)
   //   }
   // }
+  
+  
+
   SystemTrayIcon{
     visible: true
     tooltip: "Collective"
@@ -67,6 +73,7 @@ Window {
       }
     }
   }
+
   // Function to snap window to screen edges based on mouse position
   function snapToEdges(mouseX) {
     var screenWidth = Screen.desktopAvailableWidth
@@ -115,20 +122,30 @@ Window {
     easing.type: Easing.OutCubic
   }
   
-  RowLayout{
+  Row{
     anchors.fill: parent
     spacing: 10
-    //anchors.verticalCenter: parent.verticalCenter
+    layoutDirection: isSnappedToLeft ? Qt.LeftToRight : Qt.RightToLeft
+    //anchors.verticalCenter: parent.verticalCenter 
 
     Rectangle {
       id: rect
       radius: 20
-      Layout.fillWidth: true
-      Layout.fillHeight: true
+      height: parent.height
+      width: parent.width - 50
       color: "#1A1A1A"
 
       border.color: "#22ffffff"
       border.width: 0.5
+
+      Component.onCompleted: {
+        var initialImageList = Qt.createComponent("ImageList.qml")
+        initialImageList.key = 0
+        console.log(mainWindow.imageLists)
+        mainWindow.imageLists.push(initialImageList)
+
+        listLoader.sourceComponent = initialImageList
+      }
 
       // Add drag functionality to the main rectangle
       MouseArea {
@@ -176,10 +193,14 @@ Window {
           }
         }
 
-        ImageList{
-          width: parent.width - 20 // Account for both resize handles
+
+        Loader{
+          id: listLoader
+          width: parent.width - 20
           height: parent.height
+          sourceComponent: mainWindow.imageLists[mainWindow.currentImageListKey]
         }
+        
 
         // Right resize handle - only active when snapped to left
         MouseArea{
@@ -199,13 +220,75 @@ Window {
     }
 
     Rectangle{
-      width: 40
-      height: 300
+      id: optionsDock
+      width: 35
+      height: contentColumn.implicitHeight + 15
+      anchors.verticalCenter: parent.verticalCenter
       color: "#1a1a1a"
       radius: 10
 
       border.width: 0.5
       border.color: "#22ffffff"
+
+      property bool isHovering: false
+
+      Column{
+        id: contentColumn
+        spacing: 5
+        width: parent.width
+        anchors.verticalCenter: parent.verticalCenter
+
+        WorkspaceSwitcher{
+          id: workspaceSwitcher
+          anchors.horizontalCenter: parent.horizontalCenter
+          width: parent.width
+
+          onWorkspaceCreated: (key) => {
+            var imageList = Qt.createComponent("ImageList.qml")
+            imageList.key = key
+            console.log(mainWindow.imageLists)
+            mainWindow.imageLists.push(imageList)
+
+            listLoader.sourceComponent = imageList
+          }
+
+          onCurrentWorkspaceChanged: {
+            //The number of collections is way too small for linear search to be a problem
+            for(var imageList of mainWindow.imageLists){
+              if(imageList.key === workspaceSwitcher.currentWorkspace){
+                listLoader.sourceComponent = imageList
+                break
+              }
+            }
+          }
+        }
+
+        Rectangle{
+          width: parent.width - 10
+          height: 1
+          anchors.horizontalCenter: parent.horizontalCenter
+          color: "#22ffffff"
+
+          visible: optionsDock.isHovering && false
+        }
+
+        
+      }
+
+      MouseArea{
+        anchors.fill: parent
+        hoverEnabled: true
+        propagateComposedEvents: true
+
+        onEntered: {
+          parent.isHovering = true
+        }
+
+        onExited: {
+          parent.isHovering = false
+        }
+      }
+
     }
   }
 

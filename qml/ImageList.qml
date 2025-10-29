@@ -3,6 +3,8 @@ import Qt5Compat.GraphicalEffects
 
 Item {
 
+  property int key
+
   ListModel {
     id: imageList
   }

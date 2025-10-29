@@ -19,6 +19,8 @@ qt_add_qml_module(appcollective
         qml/Main.qml
         qml/ImageList.qml
         qml/PreviewWindow.qml
+        qml/WorkspaceSwitcher.qml
+        qml/EmojiPickerWindow.qml
     RESOURCES
         assets/icon.png
         assets/drag.png
@@ -32,6 +34,8 @@ qt_add_qml_module(appcollective
         assets/drop-yellow.png
         assets/reflect-white.png
         assets/reflect-yellow.png
+        assets/plus.png
+        qml/emojis.js
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

@@ -41,7 +41,7 @@ Window {
                 height: 30
                 radius: 30
                 color: "#55000000"
-                z: 10
+                z: 20
 
                 Image {
                     anchors.fill: parent

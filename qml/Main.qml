@@ -3,294 +3,286 @@ import Qt.labs.platform
 import QtQuick.Layouts
 
 Window {
-  id: mainWindow
-  width: 200
-  height: 500
-  minimumWidth: 200
-  maximumWidth: 400
-  x: 30
-  y: (Screen.desktopAvailableHeight - height) / 2
-  visible: true
-  title: qsTr("Collective")
-
-  flags: Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-  color: "transparent"
-
-  property bool isDragging: false
-  property int snapThreshold: 200 // pixels from edge to trigger snap
-  property int edgePadding: 30 // padding from screen edges when snapping
-
-  property int currentImageListKey: 0
-  property var imageLists: []
-  
-  // Check if window is snapped to left edge
-  property bool isSnappedToLeft: Math.abs(x - edgePadding) < 5
-  
-  // Check if window is snapped to right edge
-  property bool isSnappedToRight: Math.abs(x - (Screen.desktopAvailableWidth - width - edgePadding)) < 5
-
-  // MouseArea {
-  //   id: dragArea
-  //   anchors.fill: parent
-  //   acceptedButtons: Qt.LeftButton
-  //   propagateComposedEvents: true
-    
-  //   onPressed: function(mouse) {
-  //     isDragging = true
-  //     console.log("Mouse pressed - ready for edge snapping")
-  //     mouse.accepted = true
-  //   }
-    
-  //   onReleased: function(mouse) {
-  //     isDragging = false
-  //     console.log("Mouse released - checking for edge snap at position:", mouse.x, mouse.y)
-  //     mouse.accepted = true
-  //     snapToEdges(mouse.x)
-  //   }
-  // }
-  
-  
-
-  SystemTrayIcon{
+    id: mainWindow
+    width: 200
+    height: 500
+    minimumWidth: 200
+    maximumWidth: 400
+    x: 30
+    y: (Screen.desktopAvailableHeight - height) / 2
     visible: true
-    tooltip: "Collective"
-    icon.source: "qrc:/qt/qml/collective/assets/icon.png"
+    title: qsTr("Collective")
 
-    onActivated: (reason) => {
-      if(reason === SystemTrayIcon.Trigger){
-        mainWindow.show()
-      }
-    }
-  }
+    flags: Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+    color: "transparent"
 
-  Shortcut{
-    sequence: "Alt+C"
-    onActivated: (reason) => {
-      if(mainWindow.visible){
-        mainWindow.hide()
-      }else{
-        mainWindow.show()
-      }
-    }
-  }
+    property bool isDragging: false
+    property int snapThreshold: 200 // pixels from edge to trigger snap
+    property int edgePadding: 30 // padding from screen edges when snapping
 
-  // Function to snap window to screen edges based on mouse position
-  function snapToEdges(mouseX) {
-    var screenWidth = Screen.desktopAvailableWidth
-    var screenHeight = Screen.desktopAvailableHeight
-    
-    // Calculate the absolute mouse position on screen
-    var absoluteMouseX = mainWindow.x + mouseX
-    
-    // Snap to left edge with padding
-    if (absoluteMouseX < snapThreshold) {
-      snapToLeft.start()
-    }
-    // Snap to right edge with padding
-    else if (absoluteMouseX > screenWidth - snapThreshold) {
-      snapToRight.start()
-    }
-    else {
-      console.log("No edge snap - mouse position:", absoluteMouseX)
-    }
-    
-    // Keep window within screen bounds vertically
-    if (mainWindow.y < 0) {
-      mainWindow.y = 0
-    } else if (mainWindow.y > screenHeight - mainWindow.height) {
-      mainWindow.y = screenHeight - mainWindow.height
-    }
-  }
+    property int currentImageListKey: 0
+    property var imageListMap: ({})
 
-  // Animation for snapping to left edge with padding
-  NumberAnimation {
-    id: snapToLeft
-    target: mainWindow
-    property: "x"
-    to: edgePadding
-    duration: 500
-    easing.type: Easing.OutCubic
-  }
+    // Check if window is snapped to left edge
+    property bool isSnappedToLeft: Math.abs(x - edgePadding) < 5
 
-  // Animation for snapping to right edge with padding
-  NumberAnimation {
-    id: snapToRight
-    target: mainWindow
-    property: "x"
-    to: Screen.desktopAvailableWidth - mainWindow.width - edgePadding
-    duration: 500
-    easing.type: Easing.OutCubic
-  }
-  
-  Row{
-    anchors.fill: parent
-    spacing: 10
-    layoutDirection: isSnappedToLeft ? Qt.LeftToRight : Qt.RightToLeft
-    //anchors.verticalCenter: parent.verticalCenter 
+    // Check if window is snapped to right edge
+    property bool isSnappedToRight: Math.abs(x - (Screen.desktopAvailableWidth - width - edgePadding)) < 5
 
-    Rectangle {
-      id: rect
-      radius: 20
-      height: parent.height
-      width: parent.width - 50
-      color: "#1A1A1A"
+    // MouseArea {
+    //   id: dragArea
+    //   anchors.fill: parent
+    //   acceptedButtons: Qt.LeftButton
+    //   propagateComposedEvents: true
 
-      border.color: "#22ffffff"
-      border.width: 0.5
+    //   onPressed: function(mouse) {
+    //     isDragging = true
+    //     console.log("Mouse pressed - ready for edge snapping")
+    //     mouse.accepted = true
+    //   }
 
-      Component.onCompleted: {
-        var initialImageList = Qt.createComponent("ImageList.qml")
-        initialImageList.key = 0
-        console.log(mainWindow.imageLists)
-        mainWindow.imageLists.push(initialImageList)
+    //   onReleased: function(mouse) {
+    //     isDragging = false
+    //     console.log("Mouse released - checking for edge snap at position:", mouse.x, mouse.y)
+    //     mouse.accepted = true
+    //     snapToEdges(mouse.x)
+    //   }
+    // }
 
-        listLoader.sourceComponent = initialImageList
-      }
+    SystemTrayIcon {
+        visible: true
+        tooltip: "Collective"
+        icon.source: "qrc:/qt/qml/collective/assets/icon.png"
 
-      // Add drag functionality to the main rectangle
-      MouseArea {
-        id: dragArea
-        anchors.fill: parent
-        acceptedButtons: Qt.LeftButton
-        propagateComposedEvents: true
-        drag.target: mainWindow
-        drag.axis: Drag.XAndYAxis
-        cursorShape: isDragging ? Qt.ClosedHandCursor : Qt.OpenHandCursor
-        
-        onPressed: function(mouse) {
-          isDragging = true
-          console.log("Mouse pressed - ready for edge snapping")
-          mouse.accepted = true
-        }
-        
-        onReleased: function(mouse) {
-          isDragging = false
-          console.log("Mouse released - checking for edge snap at position:", mouse.x, mouse.y)
-          mouse.accepted = true
-          snapToEdges(mouse.x)
-        }
-      }
-
-      Row {
-        anchors.fill: parent
-        
-        // Left resize handle - only active when snapped to right
-        MouseArea{
-          id: leftResizeHandle
-          width: 10
-          height: parent.height
-          cursorShape: Qt.SizeHorCursor
-          drag.axis: Drag.XAxis
-          enabled: isSnappedToRight
-
-          property bool isResizing: false
-          property int startX: 0
-
-          onPressed: (mouse) => {
-            if (isSnappedToRight) {
-              mainWindow.startSystemResize(Qt.LeftEdge)
+        onActivated: reason => {
+            if (reason === SystemTrayIcon.Trigger) {
+                mainWindow.show();
             }
-          }
         }
-
-
-        Loader{
-          id: listLoader
-          width: parent.width - 20
-          height: parent.height
-          sourceComponent: mainWindow.imageLists[mainWindow.currentImageListKey]
-        }
-        
-
-        // Right resize handle - only active when snapped to left
-        MouseArea{
-          id: rightResizeHandle
-          width: 10
-          height: parent.height
-          cursorShape: Qt.SizeHorCursor
-          enabled: isSnappedToLeft
-
-          onPressed: (mouse) => {
-            if (isSnappedToLeft) {
-              mainWindow.startSystemResize(Qt.RightEdge)
-            }
-          }
-        }
-      }
     }
 
-    Rectangle{
-      id: optionsDock
-      width: 35
-      height: contentColumn.implicitHeight + 15
-      anchors.verticalCenter: parent.verticalCenter
-      color: "#1a1a1a"
-      radius: 10
-
-      border.width: 0.5
-      border.color: "#22ffffff"
-
-      property bool isHovering: false
-
-      Column{
-        id: contentColumn
-        spacing: 5
-        width: parent.width
-        anchors.verticalCenter: parent.verticalCenter
-
-        WorkspaceSwitcher{
-          id: workspaceSwitcher
-          anchors.horizontalCenter: parent.horizontalCenter
-          width: parent.width
-
-          onWorkspaceCreated: (key) => {
-            var imageList = Qt.createComponent("ImageList.qml")
-            imageList.key = key
-            console.log(mainWindow.imageLists)
-            mainWindow.imageLists.push(imageList)
-
-            listLoader.sourceComponent = imageList
-          }
-
-          onCurrentWorkspaceChanged: {
-            //The number of collections is way too small for linear search to be a problem
-            for(var imageList of mainWindow.imageLists){
-              if(imageList.key === workspaceSwitcher.currentWorkspace){
-                listLoader.sourceComponent = imageList
-                break
-              }
+    Shortcut {
+        sequence: "Alt+C"
+        onActivated: reason => {
+            if (mainWindow.visible) {
+                mainWindow.hide();
+            } else {
+                mainWindow.show();
             }
-          }
+        }
+    }
+
+    // Function to snap window to screen edges based on mouse position
+    function snapToEdges(mouseX) {
+        var screenWidth = Screen.desktopAvailableWidth;
+        var screenHeight = Screen.desktopAvailableHeight;
+
+        // Calculate the absolute mouse position on screen
+        var absoluteMouseX = mainWindow.x + mouseX;
+
+        // Snap to left edge with padding
+        if (absoluteMouseX < snapThreshold) {
+            snapToLeft.start();
+        } else
+        // Snap to right edge with padding
+        if (absoluteMouseX > screenWidth - snapThreshold) {
+            snapToRight.start();
+        } else {
+            console.log("No edge snap - mouse position:", absoluteMouseX);
         }
 
-        Rectangle{
-          width: parent.width - 10
-          height: 1
-          anchors.horizontalCenter: parent.horizontalCenter
-          color: "#22ffffff"
-
-          visible: optionsDock.isHovering && false
+        // Keep window within screen bounds vertically
+        if (mainWindow.y < 0) {
+            mainWindow.y = 0;
+        } else if (mainWindow.y > screenHeight - mainWindow.height) {
+            mainWindow.y = screenHeight - mainWindow.height;
         }
+    }
 
-        
-      }
+    // Animation for snapping to left edge with padding
+    NumberAnimation {
+        id: snapToLeft
+        target: mainWindow
+        property: "x"
+        to: edgePadding
+        duration: 500
+        easing.type: Easing.OutCubic
+    }
 
-      MouseArea{
+    // Animation for snapping to right edge with padding
+    NumberAnimation {
+        id: snapToRight
+        target: mainWindow
+        property: "x"
+        to: Screen.desktopAvailableWidth - mainWindow.width - edgePadding
+        duration: 500
+        easing.type: Easing.OutCubic
+    }
+
+    Row {
+        id: mainDock
         anchors.fill: parent
-        hoverEnabled: true
-        propagateComposedEvents: true
-
-        onEntered: {
-          parent.isHovering = true
+        spacing: 10
+        layoutDirection: isSnappedToLeft ? Qt.LeftToRight : Qt.RightToLeft
+        //anchors.verticalCenter: parent.verticalCenter
+        
+        function addImageList(key: int){
+            var initialImageListComponent = Qt.createComponent("ImageList.qml");
+            if(initialImageListComponent.status === Component.Ready){
+                var initialImageList = initialImageListComponent.createObject(listContainer);
+                if(initialImageList !== null){
+                    initialImageList.key = key;
+                    mainWindow.imageListMap[key] = initialImageList;
+                }
+            }
         }
 
-        onExited: {
-          parent.isHovering = false
-        }
-      }
+        Rectangle {
+            id: rect
+            radius: 20
+            height: parent.height
+            width: parent.width - 50
+            color: "#1A1A1A"
 
+            border.color: "#22ffffff"
+            border.width: 0.5
+
+            Component.onCompleted: {
+                mainDock.addImageList(0);
+
+            }
+
+            // Add drag functionality to the main rectangle
+            MouseArea {
+                id: dragArea
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton
+                propagateComposedEvents: true
+                drag.target: mainWindow
+                drag.axis: Drag.XAndYAxis
+                cursorShape: isDragging ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+
+                onPressed: function (mouse) {
+                    isDragging = true;
+                    console.log("Mouse pressed - ready for edge snapping");
+                    mouse.accepted = true;
+                }
+
+                onReleased: function (mouse) {
+                    isDragging = false;
+                    console.log("Mouse released - checking for edge snap at position:", mouse.x, mouse.y);
+                    mouse.accepted = true;
+                    snapToEdges(mouse.x);
+                }
+            }
+
+            Row {
+                anchors.fill: parent
+
+                // Left resize handle - only active when snapped to right
+                MouseArea {
+                    id: leftResizeHandle
+                    width: 10
+                    height: parent.height
+                    cursorShape: Qt.SizeHorCursor
+                    drag.axis: Drag.XAxis
+                    enabled: isSnappedToRight
+
+                    property bool isResizing: false
+                    property int startX: 0
+
+                    onPressed: mouse => {
+                        if (isSnappedToRight) {
+                            mainWindow.startSystemResize(Qt.LeftEdge);
+                        }
+                    }
+                }
+
+                Item {
+                    id: listContainer
+                    width: parent.width - 20
+                    height: parent.height
+                }
+
+                // Right resize handle - only active when snapped to left
+                MouseArea {
+                    id: rightResizeHandle
+                    width: 10
+                    height: parent.height
+                    cursorShape: Qt.SizeHorCursor
+                    enabled: isSnappedToLeft
+
+                    onPressed: mouse => {
+                        if (isSnappedToLeft) {
+                            mainWindow.startSystemResize(Qt.RightEdge);
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            id: optionsDock
+            width: 35
+            height: contentColumn.implicitHeight + 15
+            anchors.verticalCenter: parent.verticalCenter
+            color: "#1a1a1a"
+            radius: 10
+
+            border.width: 0.5
+            border.color: "#22ffffff"
+
+            property bool isHovering: false
+
+            Column {
+                id: contentColumn
+                spacing: 5
+                width: parent.width
+                anchors.verticalCenter: parent.verticalCenter
+
+                WorkspaceSwitcher {
+                    id: workspaceSwitcher
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+
+                    onWorkspaceCreated: key => {
+                        mainDock.addImageList(key);
+                        mainWindow.imageListMap[mainWindow.currentImageListKey].visible = false;
+                        mainWindow.currentImageListKey = key;
+                        mainWindow.imageListMap[key].visible = true;
+                    }
+
+                    onCurrentWorkspaceChanged: {
+                        mainWindow.imageListMap[mainWindow.currentImageListKey].visible = false;
+
+                        mainWindow.currentImageListKey = workspaceSwitcher.currentWorkspace;
+                        mainWindow.imageListMap[workspaceSwitcher.currentWorkspace].visible = true;
+                    }
+                }
+
+                Rectangle {
+                    width: parent.width - 10
+                    height: 1
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    color: "#22ffffff"
+
+                    visible: optionsDock.isHovering && false
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                propagateComposedEvents: true
+
+                onEntered: {
+                    parent.isHovering = true;
+                }
+
+                onExited: {
+                    parent.isHovering = false;
+                }
+            }
+        }
     }
-  }
-
-  
 }

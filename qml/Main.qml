@@ -125,7 +125,7 @@ Window {
         spacing: 10
         layoutDirection: isSnappedToLeft ? Qt.LeftToRight : Qt.RightToLeft
         //anchors.verticalCenter: parent.verticalCenter
-        
+
         function addImageList(key: int){
             var initialImageListComponent = Qt.createComponent("ImageList.qml");
             if(initialImageListComponent.status === Component.Ready){
@@ -223,7 +223,7 @@ Window {
 
         Rectangle {
             id: optionsDock
-            width: 35
+            width: 40
             height: contentColumn.implicitHeight + 15
             anchors.verticalCenter: parent.verticalCenter
             color: "#1a1a1a"
@@ -243,7 +243,7 @@ Window {
                 WorkspaceSwitcher {
                     id: workspaceSwitcher
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width
+                    width: parent.width - 10
 
                     onWorkspaceCreated: key => {
                         mainDock.addImageList(key);

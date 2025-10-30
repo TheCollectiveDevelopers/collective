@@ -32,7 +32,8 @@ Item {
                 id: emojiSelector
                 width: parent.width
                 height: 30
-                color: "transparent"
+                radius: 5
+                color: key === currentWorkspace ? "#1F4CFF" : "transparent"
 
                 required property int key
                 required property string emoji
@@ -50,7 +51,6 @@ Item {
 
                     onClicked: {
                         workspaceSwitcher.currentWorkspace = parent.key;
-                        console.log(workspaceSwitcher.currentWorkspace);
                     }
                 }
             }

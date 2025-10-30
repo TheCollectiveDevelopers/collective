@@ -258,6 +258,11 @@ Window {
                         mainWindow.currentImageListKey = workspaceSwitcher.currentWorkspace;
                         mainWindow.imageListMap[workspaceSwitcher.currentWorkspace].visible = true;
                     }
+
+                    onWorkspaceDeleted: key => { 
+                        mainWindow.imageListMap[key].destroy();
+                        mainWindow.imageListMap[key] = undefined;
+                    }
                 }
 
                 Rectangle {

@@ -21,6 +21,7 @@ qt_add_qml_module(appcollective
         qml/PreviewWindow.qml
         qml/WorkspaceSwitcher.qml
         qml/EmojiPickerWindow.qml
+        qml/Dialog.qml
     RESOURCES
         assets/icon.png
         assets/drag.png

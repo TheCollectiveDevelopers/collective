@@ -1,5 +1,5 @@
+pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: workspaceSwitcher
@@ -35,7 +35,7 @@ Item {
                 width: parent.width
                 height: 30
                 radius: 5
-                color: key === currentWorkspace ? "#1F4CFF" : "transparent"
+                color: key === workspaceSwitcher.currentWorkspace ? "#22ffffff" : "transparent"
 
                 required property int key
                 required property string emoji

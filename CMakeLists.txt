@@ -4,12 +4,14 @@ project(collective VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Widgets)
-
+find_package(Qt6 REQUIRED COMPONENTS Quick Widgets Core)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 qt_standard_project_setup(REQUIRES 6.8)
 
 qt_add_executable(appcollective
     main.cpp
+    src/utils.h
+    src/utils.cpp
 )
 
 qt_add_qml_module(appcollective
@@ -22,6 +24,7 @@ qt_add_qml_module(appcollective
         qml/WorkspaceSwitcher.qml
         qml/EmojiPickerWindow.qml
         qml/Dialog.qml
+        qml/ImageListThumbnail.qml
     RESOURCES
         assets/icon.png
         assets/drag.png
@@ -53,6 +56,7 @@ set_target_properties(appcollective PROPERTIES
 target_link_libraries(appcollective
     PRIVATE Qt6::Quick
     PRIVATE Qt6::Widgets
+    PRIVATE Qt6::Core
 )
 
 include(GNUInstallDirs)

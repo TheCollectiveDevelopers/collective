@@ -1,15 +1,23 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <qqml.h>
+#include "src/utils.h"
 
 int main(int argc, char *argv[]) {
-  QApplication app(argc, argv);
+    QApplication app(argc, argv);
 
-  QQmlApplicationEngine engine;
+    QQmlApplicationEngine engine;
+    Utils utils;
 
-  QObject::connect(
-      &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
-      []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
-  engine.loadFromModule("collective", "Main");
+    qmlRegisterUncreatableType<Utils>("collective", 1, 0, "Utils", "Utils is not creatable");
 
-  return app.exec();
+    QObject::connect(
+        &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
+        []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
+
+    engine.rootContext()->setContextProperty("utils", &utils);
+    engine.loadFromModule("collective", "Main");
+
+    return app.exec();
 }

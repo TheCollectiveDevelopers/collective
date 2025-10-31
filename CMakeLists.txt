@@ -4,14 +4,12 @@ project(collective VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Widgets Core)
+find_package(Qt6 REQUIRED COMPONENTS Qml Quick Widgets Core Multimedia)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 qt_standard_project_setup(REQUIRES 6.8)
 
 qt_add_executable(appcollective
     main.cpp
-    src/utils.h
-    src/utils.cpp
 )
 
 qt_add_qml_module(appcollective
@@ -25,6 +23,14 @@ qt_add_qml_module(appcollective
         qml/EmojiPickerWindow.qml
         qml/Dialog.qml
         qml/ImageListThumbnail.qml
+        qml/MusicPreview.qml
+    SOURCES
+        src/utils.h
+        src/utils.cpp
+        src/mediaPlayer.h
+        src/mediaPlayer.cpp
+        src/mediaImageProvider.h
+        src/mediaImageProvider.cpp
     RESOURCES
         assets/icon.png
         assets/drag.png
@@ -53,10 +59,15 @@ set_target_properties(appcollective PROPERTIES
    # WIN32_EXECUTABLE TRUE
 )
 
+target_include_directories(appcollective PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 target_link_libraries(appcollective
     PRIVATE Qt6::Quick
     PRIVATE Qt6::Widgets
     PRIVATE Qt6::Core
+    PRIVATE Qt6::Multimedia
+    PRIVATE Qt6::Qml
 )
 
 include(GNUInstallDirs)

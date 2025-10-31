@@ -8,7 +8,6 @@ AnimatedImage {
     fillMode: Image.PreserveAspectFit
     required property string uri
     required property int index
-    required property int type
     property Window previewWindow: null
     layer.enabled: true
     layer.effect: OpacityMask {
@@ -23,6 +22,7 @@ AnimatedImage {
 
     // Hover tracking property
     property bool hovered: false
+    signal imageDeleted(index: int)
 
     // Semi-transparent overlay for darkening on hover
     Rectangle {
@@ -97,17 +97,12 @@ AnimatedImage {
                 }
             } else if (mouse.button === Qt.RightButton) {
                 console.log("Right clicked on image:", imageDelegate.uri);
-                for (var i = 0; i < imageList.count; i++) {
-                    if (imageList.get(i).index === imageDelegate.index) {
-                        console.log(i);
-                        if (imageDelegate.previewWindow) {
-                            imageDelegate.previewWindow.close();
-                            imageDelegate.previewWindow = null;
-                        }
-                        imageList.remove(i, 1);
-                        break;
-                    }
+                if(imageDelegate.previewWindow){
+                    imageDelegate.previewWindow.close();
+                    imageDelegate.previewWindow = null;
                 }
+                imageDelegate.imageDeleted(imageDelegate.index);
+
             }
         }
     }

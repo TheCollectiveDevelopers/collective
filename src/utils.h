@@ -3,6 +3,7 @@
 #include <QMimeData>
 #include <QObject>
 #include <QUrl>
+#include <qtmetamacros.h>
 
 class Utils : public QObject {
     Q_OBJECT

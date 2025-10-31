@@ -3,6 +3,8 @@
 #include <QQmlContext>
 #include <qqml.h>
 #include "src/utils.h"
+#include "src/mediaPlayer.h"
+#include "src/mediaImageProvider.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
@@ -10,7 +12,12 @@ int main(int argc, char *argv[]) {
     QQmlApplicationEngine engine;
     Utils utils;
 
+    qmlRegisterType<CollectiveMediaPlayer>("collective", 1, 0, "CollectiveMediaPlayer");
     qmlRegisterUncreatableType<Utils>("collective", 1, 0, "Utils", "Utils is not creatable");
+
+    MediaImageProvider *imageProvider = new MediaImageProvider();
+    CollectiveMediaPlayer::setImageProvider(imageProvider);
+    engine.addImageProvider("albumArt", imageProvider);
 
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,

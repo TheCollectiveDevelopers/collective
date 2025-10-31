@@ -11,6 +11,8 @@ Item {
         id: imageList
     }
 
+
+
     ListView {
         id: listView
         anchors.fill: parent
@@ -30,8 +32,54 @@ Item {
 
         model: imageList
 
-        delegate: ImageListThumbnail{
-            width: listView.width
+        delegate: Loader{
+            id: loader
+            required property string uri
+            required property int index
+            required property int type
+
+            Component{
+                id: imageDelegate
+
+                ImageListThumbnail{
+                    width: listView.width
+                    uri: loader.uri
+                    index: loader.index
+
+                    onImageDeleted: key => {
+                        for (var i = 0; i < imageList.count; i++) {
+                            if (imageList.get(i).index === key) {
+                                imageList.remove(i, 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            Component{
+                id: audioDelegate
+
+                MusicPreview{
+                    width: listView.width
+                    uri: loader.uri
+                    index: loader.index
+                }
+            }
+
+
+            function getComponent(){
+                if(type === Utils.Image){
+                    return imageDelegate;
+                }else if(type === Utils.Music){
+                    return audioDelegate;
+                }else{
+                    return undefined;
+                }
+            }
+
+            sourceComponent: getComponent()
+
         }
     }
 

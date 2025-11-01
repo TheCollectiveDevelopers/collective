@@ -1,12 +1,11 @@
 import QtQuick
 import Qt.labs.platform
-import QtQuick.Layouts
 
 Window {
     id: mainWindow
     width: 200
     height: 500
-    minimumWidth: 200
+    minimumWidth: 150
     maximumWidth: 400
     x: 30
     y: (Screen.desktopAvailableHeight - height) / 2
@@ -63,7 +62,7 @@ Window {
 
     Shortcut {
         sequence: "Alt+C"
-        onActivated: reason => {
+        onActivated: {
             if (mainWindow.visible) {
                 mainWindow.hide();
             } else {
@@ -126,14 +125,16 @@ Window {
         layoutDirection: isSnappedToLeft ? Qt.LeftToRight : Qt.RightToLeft
         //anchors.verticalCenter: parent.verticalCenter
 
-        function addImageList(key: int){
+        function addImageList(key: int) {
             var initialImageListComponent = Qt.createComponent("ImageList.qml");
-            if(initialImageListComponent.status === Component.Ready){
+            if (initialImageListComponent.status === Component.Ready) {
                 var initialImageList = initialImageListComponent.createObject(listContainer);
-                if(initialImageList !== null){
+                if (initialImageList !== null) {
                     initialImageList.key = key;
                     mainWindow.imageListMap[key] = initialImageList;
                 }
+            } else {
+                console.log(initialImageListComponent.errorString());
             }
         }
 
@@ -143,13 +144,13 @@ Window {
             height: parent.height
             width: parent.width - 50
             color: "#1A1A1A"
+            clip: true
 
             border.color: "#22ffffff"
             border.width: 0.5
 
             Component.onCompleted: {
                 mainDock.addImageList(0);
-
             }
 
             // Add drag functionality to the main rectangle
@@ -257,6 +258,11 @@ Window {
 
                         mainWindow.currentImageListKey = workspaceSwitcher.currentWorkspace;
                         mainWindow.imageListMap[workspaceSwitcher.currentWorkspace].visible = true;
+                    }
+
+                    onWorkspaceDeleted: key => {
+                        mainWindow.imageListMap[key].destroy();
+                        mainWindow.imageListMap[key] = undefined;
                     }
                 }
 

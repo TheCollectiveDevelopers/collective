@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import Qt5Compat.GraphicalEffects
 
@@ -44,12 +45,12 @@ Window {
             var scalingFactor = 0;
 
             if (previewImageRectangle.width > previewImageRectangle.height) {
-                scalingFactor = (previewImageRectangle.width) / imageWidth;
+                scalingFactor = (previewImageRectangle.width) / previewWindow.imageWidth;
             } else {
-                scalingFactor = (previewImageRectangle.height) / imageHeight;
+                scalingFactor = (previewImageRectangle.height) / previewWindow.imageHeight;
             }
-            previewImageRectangle.updatedImageWidth = imageWidth * scalingFactor;
-            previewImageRectangle.updatedImageHeight = imageHeight * scalingFactor;
+            previewImageRectangle.updatedImageWidth = previewWindow.imageWidth * scalingFactor;
+            previewImageRectangle.updatedImageHeight = previewWindow.imageHeight * scalingFactor;
         }
 
         onWidthChanged: updateImageSize()
@@ -276,7 +277,7 @@ Window {
         anchors.top: previewWindow.top
         height: 30
         width: previewWindow.width
-        anchors.margins: resizeMargin
+        anchors.margins: previewWindow.resizeMargin
         propagateComposedEvents: true
         hoverEnabled: true
         onPressed: {
@@ -294,12 +295,11 @@ Window {
     }
     // Move area - center of window
 
-
     // Top-left corner resize
     MouseArea {
         id: topLeftResize
-        width: cornerSize
-        height: cornerSize
+        width: previewWindow.cornerSize
+        height: previewWindow.cornerSize
         anchors.left: parent.left
         anchors.top: parent.top
         cursorShape: Qt.SizeFDiagCursor
@@ -313,8 +313,8 @@ Window {
     // Top-right corner resize
     MouseArea {
         id: topRightResize
-        width: cornerSize
-        height: cornerSize
+        width: previewWindow.cornerSize
+        height: previewWindow.cornerSize
         anchors.right: parent.right
         anchors.top: parent.top
         cursorShape: Qt.SizeBDiagCursor
@@ -328,8 +328,8 @@ Window {
     // Bottom-left corner resize
     MouseArea {
         id: bottomLeftResize
-        width: cornerSize
-        height: cornerSize
+        width: previewWindow.cornerSize
+        height: previewWindow.cornerSize
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         cursorShape: Qt.SizeBDiagCursor
@@ -343,8 +343,8 @@ Window {
     // Bottom-right corner resize
     MouseArea {
         id: bottomRightResize
-        width: cornerSize
-        height: cornerSize
+        width: previewWindow.cornerSize
+        height: previewWindow.cornerSize
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         cursorShape: Qt.SizeFDiagCursor
@@ -358,7 +358,7 @@ Window {
     // Top edge resize
     MouseArea {
         id: topResize
-        height: resizeMargin
+        height: previewWindow.resizeMargin
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top

@@ -1,8 +1,10 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import Qt5Compat.GraphicalEffects
 
 Item {
     anchors.fill: parent
+    height: 500
     property int key
 
     ListModel {
@@ -28,108 +30,23 @@ Item {
 
         model: imageList
 
-        delegate: AnimatedImage {
-            id: imageDelegate
-            width: parent.width
-            sourceSize.width: 300
-            fillMode: Image.PreserveAspectFit
+        delegate: Loader{
+            id: loader
             required property string uri
             required property int index
-            property Window previewWindow: null
-            layer.enabled: true
-            layer.effect: OpacityMask {
-                maskSource: Rectangle {
-                    width: imageDelegate.width
-                    height: imageDelegate.height
-                    radius: 12
-                }
-            }
+            required property int type
 
-            source: imageDelegate.uri
+            Component{
+                id: imageDelegate
 
-            // Hover tracking property
-            property bool hovered: false
+                ImageListThumbnail{
+                    width: listView.width
+                    uri: loader.uri
+                    index: loader.index
 
-            // Semi-transparent overlay for darkening on hover
-            Rectangle {
-                anchors.fill: parent
-                color: hovered ? "#66000000" : "transparent"  // Dark overlay on hover
-                radius: 12
-                z: 1
-            }
-
-            // Animate opacity on appearance
-            SequentialAnimation on opacity {
-                running: true
-                loops: 1
-                PropertyAction {
-                    target: imageDelegate
-                    property: "opacity"
-                    value: 0
-                }
-                NumberAnimation {
-                    to: 1
-                    duration: 100
-                    easing.type: Easing.InOutQuad
-                }
-            }
-
-            // Animate scale on appearance for emerging effect
-            SequentialAnimation on scale {
-                running: true
-                loops: 1
-                PropertyAction {
-                    target: imageDelegate
-                    property: "scale"
-                    value: 0.8
-                }
-                NumberAnimation {
-                    to: 1
-                    duration: 100
-                    easing.type: Easing.InOutQuad
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                preventStealing: true
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-                hoverEnabled: true
-                onEntered: {
-                    imageDelegate.hovered = true;
-                }
-                onExited: {
-                    imageDelegate.hovered = false;
-                }
-
-                onPressed: function (mouse) {
-                    if (mouse.button === Qt.LeftButton) {
-                        console.log("Left clicked on image:", imageDelegate.uri);
-                        var previewWindowComponent = Qt.createComponent("PreviewWindow.qml");
-
-                        if (previewWindowComponent.status === Component.Ready) {
-                            previewWindow = previewWindowComponent.createObject(null);
-                            if (previewWindow) {
-                                previewWindow.uri = imageDelegate.uri;
-                                previewWindow.width = imageDelegate.width * 1.5;
-                                previewWindow.height = imageDelegate.height * 1.5;
-                                previewWindow.imageWidth = imageDelegate.width * 1.5;
-                                previewWindow.imageHeight = imageDelegate.height * 1.5;
-                                previewWindow.minimumWidth = Math.max(imageDelegate.width * 0.4, 150);
-                                previewWindow.minimumHeight = Math.max(imageDelegate.height * 0.4, 150);
-                                previewWindow.show();
-                            }
-                        }
-                    } else if (mouse.button === Qt.RightButton) {
-                        console.log("Right clicked on image:", imageDelegate.uri);
+                    onImageDeleted: key => {
                         for (var i = 0; i < imageList.count; i++) {
-                            if (imageList.get(i).index === imageDelegate.index) {
-                                console.log(i);
-                                if (previewWindow) {
-                                    previewWindow.close();
-                                    previewWindow = null;
-                                }
+                            if (imageList.get(i).index === key) {
                                 imageList.remove(i, 1);
                                 break;
                             }
@@ -137,6 +54,44 @@ Item {
                     }
                 }
             }
+
+            Component{
+                id: audioDelegate
+
+                MusicPreview{
+                    width: listView.width
+                    uri: loader.uri
+                    index: loader.index
+
+                    MouseArea{
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton
+
+                        onClicked: {
+                            for (var i = 0; i < imageList.count; i++) {
+                                if (imageList.get(i).index === loader.index) {
+                                    imageList.remove(i, 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            function getComponent(){
+                if(type === Utils.Image){
+                    return imageDelegate;
+                }else if(type === Utils.Music){
+                    return audioDelegate;
+                }else{
+                    return undefined;
+                }
+            }
+
+            sourceComponent: getComponent()
+
         }
     }
 
@@ -174,22 +129,33 @@ Item {
         target: dropArea
 
         function onEntered(drag) {
-            console.log("Drag entered - hasUrls:", drag.hasUrls, "formats:", drag.formats);
             if (drag.hasUrls) {
-                drag.accept(Qt.LinkAction);
-                console.log("Drag accepted with LinkAction");
+                for (var url of drag.urls) {
+                    if (utils.allowDropFile(url)) {
+                        drag.accept(Qt.LinkAction);
+                    }
+                }
             }
         }
 
         function onDropped(drop) {
-            console.log("Drop event - hasUrls:", drop.hasUrls, "urls:", drop.urls);
             if (drop.hasUrls) {
                 for (const url of drop.urls) {
-                    console.log("Adding URL:", url);
-                    imageList.append({
-                        uri: url,
-                        index: imageList.count
-                    });
+                    console.log(Utils.PDF);
+                    if (utils.detectFileType(url) === Utils.Image || utils.detectFileType(url) === Utils.URL) {
+                        console.log("Adding URL:", url);
+                        imageList.append({
+                            uri: url,
+                            index: imageList.count,
+                            type: Utils.Image
+                        });
+                    } else if (utils.detectFileType(url) === Utils.Music) {
+                        imageList.append({
+                            uri: url,
+                            index: imageList.count,
+                            type: Utils.Music
+                        });
+                    }
                 }
                 drop.accept(Qt.LinkAction);
             }

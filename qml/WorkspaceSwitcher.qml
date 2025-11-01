@@ -1,12 +1,14 @@
+pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: workspaceSwitcher
     height: contentColumn.implicitHeight
 
     signal workspaceCreated(key: int)
+    signal workspaceDeleted(key: int)
     property int currentWorkspace: 0
+    property int deleteWorkspace
 
     ListModel {
         id: workspaceList
@@ -33,7 +35,7 @@ Item {
                 width: parent.width
                 height: 30
                 radius: 5
-                color: key === currentWorkspace ? "#1F4CFF" : "transparent"
+                color: key === workspaceSwitcher.currentWorkspace ? "#22ffffff" : "transparent"
 
                 required property int key
                 required property string emoji
@@ -48,9 +50,17 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-                    onClicked: {
-                        workspaceSwitcher.currentWorkspace = parent.key;
+                    onClicked: mouse => {
+                        if (mouse.button === Qt.LeftButton) {
+                            workspaceSwitcher.currentWorkspace = parent.key;
+                        } else if (mouse.button === Qt.RightButton) {
+                            if (workspaceList.count > 1) {
+                                workspaceSwitcher.deleteWorkspace = parent.key;
+                                deleteDialog.open();
+                            }
+                        }
                     }
                 }
             }
@@ -67,6 +77,34 @@ Item {
 
                 onClicked: {
                     emojiPicker.show();
+                }
+            }
+        }
+    }
+
+    Dialog {
+        id: deleteDialog
+        buttons: Dialog.Ok | Dialog.Cancel
+        text: "Delete this collection?"
+
+        onAccepted: {
+            if (workspaceList.count === 1) {
+                return;
+            }
+
+            if (workspaceSwitcher.deleteWorkspace === 0) {
+                workspaceSwitcher.currentWorkspace = workspaceList.get(1).key;
+                workspaceList.remove(0, 1);
+                workspaceSwitcher.workspaceDeleted(workspaceSwitcher.deleteWorkspace);
+                return;
+            }
+
+            for (var i = 0; i < workspaceList.count; i++) {
+                if (workspaceList.get(i).key === workspaceSwitcher.deleteWorkspace) {
+                    workspaceSwitcher.currentWorkspace = workspaceList.get(i - 1).key;
+                    workspaceList.remove(i, 1);
+                    workspaceSwitcher.workspaceDeleted(workspaceSwitcher.deleteWorkspace);
+                    break;
                 }
             }
         }

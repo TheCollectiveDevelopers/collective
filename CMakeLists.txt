@@ -24,6 +24,7 @@ qt_add_qml_module(appcollective
         qml/Dialog.qml
         qml/ImageListThumbnail.qml
         qml/MusicPreview.qml
+        qml/MiniWaveform.qml
     SOURCES
         src/utils.h
         src/utils.cpp
@@ -46,6 +47,9 @@ qt_add_qml_module(appcollective
         assets/reflect-yellow.png
         assets/plus.png
         qml/emojis.js
+        assets/sh-ad-grotesk.ttf
+        assets/calsans.ttf
+        assets/music-player.gif
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

@@ -21,6 +21,8 @@ Utils::AssetTypes Utils::detectFileType(QUrl fileUrl) const{
         return Utils::AssetTypes::PDF;
     }else if(mime.name().startsWith("video/")){
         return Utils::AssetTypes::Video;
+    }else if(mime.name().compare("text/uri-list")){
+        return Utils::AssetTypes::URL;
     }else{
         return Utils::AssetTypes::Other;
     }

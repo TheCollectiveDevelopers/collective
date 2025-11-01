@@ -11,8 +11,6 @@ Item {
         id: imageList
     }
 
-
-
     ListView {
         id: listView
         anchors.fill: parent
@@ -64,6 +62,20 @@ Item {
                     width: listView.width
                     uri: loader.uri
                     index: loader.index
+
+                    MouseArea{
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton
+
+                        onClicked: {
+                            for (var i = 0; i < imageList.count; i++) {
+                                if (imageList.get(i).index === loader.index) {
+                                    imageList.remove(i, 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -130,7 +142,7 @@ Item {
             if (drop.hasUrls) {
                 for (const url of drop.urls) {
                     console.log(Utils.PDF);
-                    if (utils.detectFileType(url) === Utils.Image) {
+                    if (utils.detectFileType(url) === Utils.Image || utils.detectFileType(url) === Utils.URL) {
                         console.log("Adding URL:", url);
                         imageList.append({
                             uri: url,

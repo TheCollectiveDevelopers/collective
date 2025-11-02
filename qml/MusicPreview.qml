@@ -77,7 +77,7 @@ Rectangle{
             }
 
             Text{
-                text: mediaPlayer.metaData.value(1) ?? mediaPlayer.metaData.value(19) ?? "Unknown" //Author
+                text: mediaPlayer.metaData.value(19) ?? mediaPlayer.metaData.value(20)[0] ?? mediaPlayer.metaData.value(1) ?? "Unknown" //Author
                 color: "#99ffffff"
                 font: shAdGrotesk.font
                 width: parent.width

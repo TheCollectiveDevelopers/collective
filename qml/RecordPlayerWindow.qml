@@ -8,13 +8,40 @@ Window{
     color: "transparent"
 
     property bool locked: false
+    required property string song
+
 
     Rectangle {
         anchors.fill: parent
         radius: 17
         border.width: 0.5
         border.color: "#22ffffff"
-        color: "#1a1a1a"
+        color: "#141414"
+
+        Column{
+            anchors.fill: parent
+            spacing: 10
+
+            Item{
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 10
+                height: 40
+
+                Rectangle{
+                    height: parent.height
+                    anchors.left: parent.left
+                    color: "#1F1F1F"
+
+                    Text{
+                        text: recordPlayerWindow.song
+                        color: "#A2A2A2"
+                    }
+                }
+
+
+            }
+        }
     }
 
     MouseArea {

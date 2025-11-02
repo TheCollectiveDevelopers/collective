@@ -56,6 +56,15 @@ Rectangle{
                     radius: 7
                 }
             }
+
+            MouseArea{
+                anchors.fill: parent
+                propagateComposedEvents: true
+
+                onClicked: {
+                    recordPlayer.show()
+                }
+            }
         }
 
         Column{
@@ -119,5 +128,11 @@ Rectangle{
                 color: "white"
             }
         }
+    }
+
+    RecordPlayerWindow{
+        id: recordPlayer
+        uri: parent.uri
+        externalMediaPlayer: mediaPlayer
     }
 }

@@ -14,18 +14,72 @@ Window{
     property bool locked: false
     required property url uri
     property var externalMediaPlayer: null
+    property bool expandedView: false
+
+    FontLoader{
+        id: calSans
+        source: "qrc:/qt/qml/collective/assets/calsans.ttf"
+    }
+
+    Rectangle {
+        id: expandedAlbumArtContainer
+        anchors.fill: parent
+        visible: expandedView
+        z: 0
+        color: "transparent"
+        border.width: 30
+        border.color: '#000000'
+        radius: 17
+        clip: true
+
+        Image{
+            id: expandedAlbumArt
+            anchors.fill: parent
+            anchors.margins: 5
+            source: externalMediaPlayer ? externalMediaPlayer.coverArtUrl : ""
+            fillMode: Image.PreserveAspectCrop
+            smooth: true
+
+            layer.enabled: true
+            layer.effect: OpacityMask {
+                maskSource: Rectangle {
+                    width: expandedAlbumArt.width
+                    height: expandedAlbumArt.height
+                    radius: 12
+                }
+            }
+        }
+
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 5
+            anchors.rightMargin: 5
+            anchors.bottomMargin: 5
+            height: parent.height * 0.5
+            z: 1
+            radius: 12
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#00000000" }
+                GradientStop { position: 1.0; color: "#FF000000" }
+            }
+        }
+    }
 
     Rectangle {
         anchors.fill: parent
         radius: 17
         border.width: 0.5
         border.color: "#22ffffff"
-        color: "#141414"
+        color: expandedView ? "transparent" : "#141414"
+        z: 1
 
         Column{
             anchors.fill: parent
             anchors.margins: 10
             spacing: 10
+            z: 2
 
             Item{
                 anchors.left: parent.left
@@ -38,7 +92,7 @@ Window{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     color: "#1F1F1F"
-                    border.width: 0.5
+                    border.width: 0
                     border.color: "#4A4A4A"
                     radius: 7
 
@@ -46,32 +100,77 @@ Window{
                         anchors.centerIn: parent
                         text: externalMediaPlayer ? externalMediaPlayer.metaData.value(0) ?? "Unknown" : "Unknown"
                         color: "#A2A2A2"
+                        font.family: calSans.name
                     }
                 }
 
                 Rectangle {
-                    id: close
+                    id: titleBar
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 30
                     height: 30
-                    radius: 30
-                    color: "#55000000"
+                    width: contentRow.implicitWidth + 20
+                    radius: 20
                     z: 20
+                    property bool hovering: false
+                    color: "#1a1a1a"
 
-                    Image {
-                        anchors.fill: parent
-                        anchors.centerIn: parent
-                        anchors.margins: 7
-
-                        source: "qrc:/qt/qml/collective/assets/x-white.png"
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 300
+                            easing.type: Easing.InOutQuad
+                        }
                     }
 
-                    MouseArea {
-                        anchors.fill: parent
+                    Row {
+                        id: contentRow
+                        spacing: 10
+                        x: 10
+                        anchors.verticalCenter: parent.verticalCenter
 
-                        onClicked: {
-                            recordPlayerWindow.close();
+                        Item {
+                            width: titleBar.hovering ? 15 : 0
+                            height: 15
+                            visible: titleBar.hovering
+
+                            Behavior on width {
+                                NumberAnimation {
+                                    duration: 300
+                                    easing.type: Easing.InOutQuad
+                                }
+                            }
+
+                            Image {
+                                width: 15
+                                height: 15
+                                anchors.centerIn: parent
+                                source: "qrc:/qt/qml/collective/assets/lock-white.png"
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+
+                                    onClicked: {
+                                        recordPlayerWindow.expandedView = !recordPlayerWindow.expandedView;
+                                    }
+                                }
+                            }
+                        }
+
+                        Image {
+                            width: 15
+                            height: 15
+                            source: "qrc:/qt/qml/collective/assets/x-white.png"
+                            visible: !recordPlayerWindow.locked
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+
+                                onClicked: {
+                                    recordPlayerWindow.close();
+                                }
+                            }
                         }
                     }
                 }
@@ -87,6 +186,7 @@ Window{
                     anchors.centerIn: parent
                     width: 150
                     height: 150
+                    visible: !expandedView
 
                     Image{
                         id: recordDisk
@@ -178,6 +278,7 @@ Window{
                             id: currentPositionText
                             anchors.left: parent.left
                             color: "white"
+                            font.family: calSans.name
                             text: {
                                 var remainingMs = externalMediaPlayer ? externalMediaPlayer.position : 0;
                                 var totalSeconds = Math.floor(remainingMs / 1000);
@@ -191,6 +292,7 @@ Window{
                             id: durationText
                             color: "white"
                             anchors.right: parent.right
+                            font.family: calSans.name
 
                             text: {
                                 var duration = externalMediaPlayer ? externalMediaPlayer.duration : 0;
@@ -319,8 +421,18 @@ Window{
         width: recordPlayerWindow.width
         anchors.margins: 8
         propagateComposedEvents: true
+        hoverEnabled: true
+
         onPressed: {
             recordPlayerWindow.startSystemMove();
+        }
+
+        onEntered: {
+            titleBar.hovering = true;
+        }
+
+        onExited: {
+            titleBar.hovering = false;
         }
     }
 

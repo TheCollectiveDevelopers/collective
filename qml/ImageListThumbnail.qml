@@ -127,17 +127,20 @@ AnimatedImage {
     PreviewWindow{
         id: previewWindow
         uri: imageDelegate.uri
-        width: Math.max(300, imageDelegate.width * 1.5)
-        height: width / imageDelegate.width * imageDelegate.height
-        imageWidth: Math.max(300, imageDelegate.width * 1.5)
-        imageHeight: width / imageDelegate.width * imageDelegate.height
-        minimumWidth: Math.max(imageDelegate.width * 0.4, 150)
-        minimumHeight: Math.max(imageDelegate.height * 0.4, 150)
 
         onLockedChanged: {
             if(!locked){
                 flags = Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
             }
+        }
+
+        Component.onCompleted: {
+            width = Math.max(300, imageDelegate.width * 1.5)
+            height = width / imageDelegate.width * imageDelegate.height
+            imageWidth = Math.max(300, imageDelegate.width * 1.5)
+            imageHeight = width / imageDelegate.width * imageDelegate.height
+            minimumWidth = Math.max(imageDelegate.width * 0.4, 150)
+            minimumHeight = Math.max(imageDelegate.height * 0.4, 150)
         }
     }
 }

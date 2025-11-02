@@ -32,6 +32,36 @@ AnimatedImage {
         z: 1
     }
 
+    Rectangle{
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 10
+        color: "#1a1a1a"
+        visible: previewWindow.locked
+        width: 25
+        height: 25
+        z: 2
+
+        radius: 2
+
+        Image{
+            width: 15
+            height: 15
+            anchors.centerIn: parent
+            anchors.margins: 10
+            source: "qrc:/qt/qml/collective/assets/lock-yellow.png"
+
+            MouseArea{
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+
+                onClicked: {
+                    previewWindow.locked = false;
+                }
+            }
+        }
+    }
+
     // Animate opacity on appearance
     SequentialAnimation on opacity {
         running: true
@@ -68,6 +98,7 @@ AnimatedImage {
         anchors.fill: parent
         preventStealing: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
+        propagateComposedEvents: true
 
         hoverEnabled: true
         onEntered: {
@@ -80,21 +111,7 @@ AnimatedImage {
         onPressed: function (mouse) {
             if (mouse.button === Qt.LeftButton) {
                 console.log("Left clicked on image:", imageDelegate.uri);
-                var previewWindowComponent = Qt.createComponent("PreviewWindow.qml");
-
-                if (previewWindowComponent.status === Component.Ready) {
-                    imageDelegate.previewWindow = previewWindowComponent.createObject(null);
-                    if (imageDelegate.previewWindow) {
-                        imageDelegate.previewWindow.uri = imageDelegate.uri;
-                        imageDelegate.previewWindow.width = Math.max(300, imageDelegate.width * 1.5);
-                        imageDelegate.previewWindow.height = imageDelegate.previewWindow.width / imageDelegate.width * imageDelegate.height;
-                        imageDelegate.previewWindow.imageWidth = Math.max(300, imageDelegate.width * 1.5);
-                        imageDelegate.previewWindow.imageHeight = imageDelegate.previewWindow.imageWidth / imageDelegate.width * imageDelegate.height;
-                        imageDelegate.previewWindow.minimumWidth = Math.max(imageDelegate.width * 0.4, 150);
-                        imageDelegate.previewWindow.minimumHeight = Math.max(imageDelegate.height * 0.4, 150);
-                        imageDelegate.previewWindow.show();
-                    }
-                }
+                previewWindow.show()
             } else if (mouse.button === Qt.RightButton) {
                 console.log("Right clicked on image:", imageDelegate.uri);
                 if(imageDelegate.previewWindow){
@@ -103,6 +120,23 @@ AnimatedImage {
                 }
                 imageDelegate.imageDeleted(imageDelegate.index);
 
+            }
+        }
+    }
+
+    PreviewWindow{
+        id: previewWindow
+        uri: imageDelegate.uri
+        width: Math.max(300, imageDelegate.width * 1.5)
+        height: width / imageDelegate.width * imageDelegate.height
+        imageWidth: Math.max(300, imageDelegate.width * 1.5)
+        imageHeight: width / imageDelegate.width * imageDelegate.height
+        minimumWidth: Math.max(imageDelegate.width * 0.4, 150)
+        minimumHeight: Math.max(imageDelegate.height * 0.4, 150)
+
+        onLockedChanged: {
+            if(!locked){
+                flags = Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
             }
         }
     }

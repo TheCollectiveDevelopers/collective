@@ -234,6 +234,7 @@ Window {
 
                     onClicked: {
                         previewWindow.locked = true;
+                        previewWindow.flags = previewWindow.flags | Qt.WindowTransparentForInput;
                     }
                 }
             }
@@ -250,6 +251,7 @@ Window {
 
                     onClicked: {
                         previewWindow.locked = false;
+                        previewWindow.flags = Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint;
                     }
                 }
             }
@@ -258,6 +260,7 @@ Window {
                 width: 15
                 height: 15
                 source: "qrc:/qt/qml/collective/assets/x-white.png"
+                visible: !previewWindow.locked
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -280,6 +283,7 @@ Window {
         anchors.margins: previewWindow.resizeMargin
         propagateComposedEvents: true
         hoverEnabled: true
+
         onPressed: {
             if (!previewWindow.locked)
                 previewWindow.startSystemMove();

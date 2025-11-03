@@ -178,31 +178,12 @@ Item{
         anchors.fill: parent
         visible: !miniPlayControl.playing
 
-        // Triangle play icon
-        Canvas {
+        Image{
+            width: 17
+            height: 17
+            source: "qrc:/qt/qml/collective/assets/play.png"
+
             anchors.centerIn: parent
-            width: parent.width * 0.6
-            height: parent.height * 0.6
-
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
-                ctx.fillStyle = miniPlayControl.waveformColor
-                ctx.beginPath()
-                ctx.moveTo(0, 0)
-                ctx.lineTo(width, height / 2)
-                ctx.lineTo(0, height)
-                ctx.closePath()
-                ctx.fill()
-            }
-
-            // Repaint when color changes
-            Connections {
-                target: miniPlayControl
-                function onWaveformColorChanged() {
-                    parent.requestPaint()
-                }
-            }
         }
     }
 

@@ -6,7 +6,7 @@ import Qt5Compat.GraphicalEffects
 Rectangle{
     id: musicPreview
 
-    required property string uri
+    required property url uri
     required property int index
 
     FontLoader{

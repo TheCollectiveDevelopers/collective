@@ -57,6 +57,7 @@ qt_add_qml_module(appcollective
         assets/skip-forward.png
         assets/volume.png
         assets/pause.png
+        assets/switch.png
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

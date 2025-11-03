@@ -3,9 +3,72 @@ import QtQuick
 import Qt5Compat.GraphicalEffects
 
 Item {
+    id: imageListContainer
     anchors.fill: parent
     height: 500
-    property int key
+    property int key: -1
+
+    signal listChanged()
+
+    onKeyChanged: {
+        console.log(imageListContainer.key);
+        var assets = utils.getCollectionAssets(imageListContainer.key);
+
+        for(var asset of assets){
+            var type;
+            console.log(asset.type);
+
+            if(asset.type === "image"){
+                type = Utils.Image;
+            }else if(asset.type === "music"){
+                type = Utils.Music;
+            }else if(asset.type === "video"){
+                type = Utils.Video;
+            }else if(asset.type === "pdf"){
+                type = Utils.PDF;
+            }
+
+            console.log(type);
+
+            imageList.append({
+                uri: new URL("file://" + asset.uri),
+                index: imageList.count,
+                type: type
+            });
+        }
+    }
+
+    function deleteAssets(){
+        for(var i=0; i<imageList.count; i++){
+            var asset = imageList.get(i);
+            var urlObj = new URL(asset.uri);
+            if(urlObj.href.includes(".collective")){
+                utils.deleteAseet(asset.uri);
+            }
+        }
+    }
+
+    function saveAssets(){
+        var assets = [];
+        for(var i=0; i<imageList.count; i++){
+            var asset = imageList.get(i);
+            var type;
+            if(asset.type === Utils.Image){
+                type = "image";
+            }else if(asset.type === Utils.Music){
+                type = "music";
+            }
+
+            var urlObj = new URL(asset.uri);
+
+            assets.push({
+                uri: urlObj.href.includes(".collective") ? urlObj.pathname : utils.saveAsset(asset.uri),
+                index: asset.index,
+                type: type
+            });
+        }
+        return assets;
+    }
 
     ListModel {
         id: imageList
@@ -51,6 +114,7 @@ Item {
                                 break;
                             }
                         }
+                        imageListContainer.listChanged();
                     }
                 }
             }
@@ -74,6 +138,7 @@ Item {
                                     break;
                                 }
                             }
+                            imageListContainer.listChanged();
                         }
                     }
                 }
@@ -81,6 +146,7 @@ Item {
 
 
             function getComponent(){
+                console.log("Loader: ", type)
                 if(type === Utils.Image){
                     return imageDelegate;
                 }else if(type === Utils.Music){
@@ -91,7 +157,6 @@ Item {
             }
 
             sourceComponent: getComponent()
-
         }
     }
 
@@ -141,7 +206,6 @@ Item {
         function onDropped(drop) {
             if (drop.hasUrls) {
                 for (const url of drop.urls) {
-                    console.log(Utils.PDF);
                     if (utils.detectFileType(url) === Utils.Image || utils.detectFileType(url) === Utils.URL) {
                         console.log("Adding URL:", url);
                         imageList.append({
@@ -149,12 +213,14 @@ Item {
                             index: imageList.count,
                             type: Utils.Image
                         });
+                        imageListContainer.listChanged();
                     } else if (utils.detectFileType(url) === Utils.Music) {
                         imageList.append({
                             uri: url,
                             index: imageList.count,
                             type: Utils.Music
                         });
+                        imageListContainer.listChanged();
                     }
                 }
                 drop.accept(Qt.LinkAction);

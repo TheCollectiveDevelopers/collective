@@ -101,6 +101,7 @@ Window{
                         text: externalMediaPlayer ? externalMediaPlayer.metaData.value(0) ?? "Unknown" : "Unknown"
                         color: "#A2A2A2"
                         font.family: calSans.name
+                        font.pixelSize: 16
                     }
                 }
 
@@ -115,12 +116,12 @@ Window{
                     property bool hovering: false
                     color: "#1a1a1a"
 
-                    Behavior on width {
-                        NumberAnimation {
-                            duration: 300
-                            easing.type: Easing.InOutQuad
-                        }
-                    }
+                    // Behavior on width {
+                    //     NumberAnimation {
+                    //         duration: 100
+                    //         easing.type: Easing.Linear
+                    //     }
+                    // }
 
                     Row {
                         id: contentRow
@@ -135,8 +136,8 @@ Window{
 
                             Behavior on width {
                                 NumberAnimation {
-                                    duration: 300
-                                    easing.type: Easing.InOutQuad
+                                    duration: 100
+                                    easing.type: Easing.Linear
                                 }
                             }
 
@@ -144,7 +145,7 @@ Window{
                                 width: 15
                                 height: 15
                                 anchors.centerIn: parent
-                                source: "qrc:/qt/qml/collective/assets/lock-white.png"
+                                source: "qrc:/qt/qml/collective/assets/switch.png"
 
                                 MouseArea {
                                     anchors.fill: parent
@@ -227,7 +228,7 @@ Window{
 
             Item{
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 200
+                width: 250
                 height: 100
 
                 Column{
@@ -311,8 +312,8 @@ Window{
 
                         Image{
                             id: volumeIcon
-                            width: 15
-                            height: 15
+                            width: 17
+                            height: 17
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
                             source: "qrc:/qt/qml/collective/assets/volume.png"
@@ -337,8 +338,8 @@ Window{
                             spacing: 5
 
                             Image{
-                                width: 15
-                                height: 15
+                                width: 20
+                                height: 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 source: "qrc:/qt/qml/collective/assets/skip-back.png"
 
@@ -354,8 +355,8 @@ Window{
                             }
 
                             Image{
-                                width: 15
-                                height: 15
+                                width: 20
+                                height: 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 source: "qrc:/qt/qml/collective/assets/play.png"
                                 visible: externalMediaPlayer ? !externalMediaPlayer.playing : true
@@ -372,8 +373,8 @@ Window{
                             }
 
                             Image{
-                                width: 15
-                                height: 15
+                                width: 20
+                                height: 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 source: "qrc:/qt/qml/collective/assets/pause.png"
                                 visible: externalMediaPlayer ? externalMediaPlayer.playing : false
@@ -390,8 +391,8 @@ Window{
                             }
 
                             Image{
-                                width: 15
-                                height: 15
+                                width: 20
+                                height: 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 source: "qrc:/qt/qml/collective/assets/skip-forward.png"
 

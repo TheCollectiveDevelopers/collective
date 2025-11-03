@@ -7,16 +7,55 @@ Item {
 
     signal workspaceCreated(key: int)
     signal workspaceDeleted(key: int)
+    signal loadCollectionRequested(key: int)
     property int currentWorkspace: 0
     property int deleteWorkspace
+    property bool loaded: false
+
+    Component.onCompleted: {
+        if(!loaded){
+            var collections = utils.loadCollections();
+
+            if(collections.length === 0){
+                workspaceList.append({
+                    key: 0,
+                    emoji: "😼"
+                });
+                workspaceSwitcher.workspaceCreated(0);
+                workspaceSwitcher.currentWorkspace = workspaceList.get(0).key;
+                workspaceSwitcher.loaded = true;
+                return;
+            }
+
+            for(var i=0; i<collections.length; i++){
+                var {emoji, key} = collections[i];
+                workspaceList.append({
+                    key: key,
+                    emoji: emoji
+                });
+                workspaceSwitcher.workspaceCreated(key);
+                workspaceSwitcher.loadCollectionRequested(key);
+            }
+            workspaceSwitcher.currentWorkspace = workspaceList.get(0).key;
+            workspaceSwitcher.loaded = true;
+        }else{
+            workspaceList.append({
+                key: 0,
+                emoji: "😼"
+            });
+        }
+    }
+
+    function getCollections(){
+        var keys = [];
+        for(var i=0; i<workspaceList.count; i++){
+            keys.push(workspaceList.get(i));
+        }
+        return keys;
+    }
 
     ListModel {
         id: workspaceList
-
-        ListElement {
-            key: 0
-            emoji: "😼"
-        }
     }
 
     Column {

@@ -21,6 +21,7 @@ Window {
 
     property int currentImageListKey: 0
     property var imageListMap: ({})
+    property bool isUnsaved: false
 
     // Check if window is snapped to left edge
     property bool isSnappedToLeft: Math.abs(x - edgePadding) < 5
@@ -69,6 +70,40 @@ Window {
                 mainWindow.show();
             }
         }
+    }
+
+    // Auto-save timer - saves collections every 10 seconds
+    Timer {
+        id: autoSaveTimer
+        interval: 10000 // 10 seconds
+        running: true
+        repeat: true
+        onTriggered: {
+            saveCollections();
+        }
+    }
+
+    // Function to save all collections
+    function saveCollections() {
+        console.log("Checking for changes...");
+        if(mainWindow.isUnsaved){
+            var collections = workspaceSwitcher.getCollections();
+            var newCollections = []
+            for(var collection of collections){
+                newCollections.push({
+                    emoji: collection.emoji,
+                    key: collection.key,
+                    assets: mainWindow.imageListMap[collection.key].saveAssets()
+                })
+            }
+            utils.saveCollections(newCollections);
+            console.log("Collections auto-saved");
+            mainWindow.isUnsaved = false;
+        }
+    }
+
+    onClosing: {
+        saveCollections();
     }
 
     // Function to snap window to screen edges based on mouse position
@@ -132,6 +167,11 @@ Window {
                 if (initialImageList !== null) {
                     initialImageList.key = key;
                     mainWindow.imageListMap[key] = initialImageList;
+                    // Connect listChanged signal to set isUnsaved flag
+                    initialImageList.listChanged.connect(function() {
+                        console.log("change triggered");
+                        mainWindow.isUnsaved = true;
+                    });
                 }
             } else {
                 console.log(initialImageListComponent.errorString());
@@ -148,10 +188,6 @@ Window {
 
             border.color: "#22ffffff"
             border.width: 0.5
-
-            Component.onCompleted: {
-                mainDock.addImageList(0);
-            }
 
             // Add drag functionality to the main rectangle
             MouseArea {
@@ -246,11 +282,20 @@ Window {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width - 10
 
+                    onLoadedChanged: {
+                        if(workspaceSwitcher.loaded){
+                            mainWindow.imageListMap[mainWindow.currentImageListKey].visible = false;
+                            mainWindow.currentImageListKey = workspaceSwitcher.currentWorkspace;
+                            mainWindow.imageListMap[mainWindow.currentImageListKey].visible = true;
+                        }
+                    }
+
                     onWorkspaceCreated: key => {
                         mainDock.addImageList(key);
                         mainWindow.imageListMap[mainWindow.currentImageListKey].visible = false;
                         mainWindow.currentImageListKey = key;
                         mainWindow.imageListMap[key].visible = true;
+                        mainWindow.isUnsaved = true;
                     }
 
                     onCurrentWorkspaceChanged: {
@@ -261,8 +306,10 @@ Window {
                     }
 
                     onWorkspaceDeleted: key => {
+                        mainWindow.imageListMap[key].deleteAssets();
                         mainWindow.imageListMap[key].destroy();
                         mainWindow.imageListMap[key] = undefined;
+                        mainWindow.isUnsaved = true;
                     }
                 }
 

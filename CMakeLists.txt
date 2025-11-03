@@ -4,8 +4,8 @@ project(collective VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
-
+find_package(Qt6 REQUIRED COMPONENTS Qml Quick Widgets Core Multimedia)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 qt_standard_project_setup(REQUIRES 6.8)
 
 qt_add_executable(appcollective
@@ -19,7 +19,22 @@ qt_add_qml_module(appcollective
         qml/Main.qml
         qml/ImageList.qml
         qml/PreviewWindow.qml
+        qml/WorkspaceSwitcher.qml
+        qml/EmojiPickerWindow.qml
+        qml/Dialog.qml
+        qml/ImageListThumbnail.qml
+        qml/MusicPreview.qml
+        qml/MiniWaveform.qml
+        qml/RecordPlayerWindow.qml
+    SOURCES
+        src/utils.h
+        src/utils.cpp
+        src/mediaPlayer.h
+        src/mediaPlayer.cpp
+        src/mediaImageProvider.h
+        src/mediaImageProvider.cpp
     RESOURCES
+        assets/icon.png
         assets/drag.png
         assets/lock-white.png
         assets/lock-yellow.png
@@ -31,6 +46,18 @@ qt_add_qml_module(appcollective
         assets/drop-yellow.png
         assets/reflect-white.png
         assets/reflect-yellow.png
+        assets/plus.png
+        qml/emojis.js
+        assets/sh-ad-grotesk.ttf
+        assets/calsans.ttf
+        assets/music-player.gif
+        assets/disk.png
+        assets/play.png
+        assets/skip-back.png
+        assets/skip-forward.png
+        assets/volume.png
+        assets/pause.png
+        assets/switch.png
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -41,11 +68,18 @@ set_target_properties(appcollective PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
-   # WIN32_EXECUTABLE TRUE
+    WIN32_EXECUTABLE TRUE
 )
+
+target_include_directories(appcollective PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(appcollective
     PRIVATE Qt6::Quick
+    PRIVATE Qt6::Widgets
+    PRIVATE Qt6::Core
+    PRIVATE Qt6::Multimedia
+    PRIVATE Qt6::Qml
 )
 
 include(GNUInstallDirs)

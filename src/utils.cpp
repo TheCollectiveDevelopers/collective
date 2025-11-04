@@ -88,7 +88,7 @@ QString Utils::saveAsset(QUrl url) const {
     if (url.isLocalFile()) {
         QString sourcePath = url.toLocalFile();
         QFileInfo fileInfo(sourcePath);
-        
+
         // Read file contents for hash
         QFile sourceFile(sourcePath);
         if (!sourceFile.open(QIODevice::ReadOnly)) {
@@ -96,7 +96,7 @@ QString Utils::saveAsset(QUrl url) const {
         }
         QByteArray fileData = sourceFile.readAll();
         sourceFile.close();
-        
+
         QCryptographicHash hash(QCryptographicHash::Md5);
         hash.addData(fileData);
         QString fileName = hash.result().toHex() + "." + fileInfo.suffix();
@@ -231,4 +231,25 @@ QJsonArray Utils::getCollectionAssets(int key) const {
     }
 
     return QJsonArray();
+}
+
+QString Utils::normalizeFileUrl(const QString& path) const {
+    QUrl url(path);
+    
+    // If it's already a valid local file URL, return it as-is
+    if (url.isLocalFile()) {
+        return url.toString();
+    }
+    
+    // If it's just a path, convert to proper file URL
+    // QUrl::fromLocalFile handles Windows/Unix differences automatically
+    return QUrl::fromLocalFile(path).toString();
+}
+
+QString Utils::urlToLocalPath(const QString& url) const {
+    QUrl qurl(url);
+    
+    // Qt's toLocalFile() handles all platform differences automatically
+    // Returns proper path format for Windows (C:\path) or Unix (/path)
+    return qurl.toLocalFile();
 }

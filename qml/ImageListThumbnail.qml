@@ -24,6 +24,14 @@ AnimatedImage {
     property bool hovered: false
     signal imageDeleted(index: int)
 
+    // Drag configuration
+    Drag.active: dragArea.drag.active
+    Drag.dragType: Drag.Automatic
+    Drag.supportedActions: Qt.CopyAction
+    Drag.mimeData: {
+        "text/uri-list": uri
+    }
+
     // Semi-transparent overlay for darkening on hover
     Rectangle {
         anchors.fill: parent
@@ -95,10 +103,12 @@ AnimatedImage {
     }
 
     MouseArea {
+        id: dragArea
         anchors.fill: parent
         preventStealing: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         propagateComposedEvents: true
+        drag.target: imageDelegate
 
         hoverEnabled: true
         onEntered: {
@@ -121,6 +131,10 @@ AnimatedImage {
                 imageDelegate.imageDeleted(imageDelegate.index);
 
             }
+        }
+
+        onReleased: {
+            imageDelegate.Drag.drop()
         }
     }
 

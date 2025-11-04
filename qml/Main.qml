@@ -3,7 +3,7 @@ import Qt.labs.platform
 
 Window {
     id: mainWindow
-    width: 200
+    width: 175
     height: 500
     minimumWidth: 150
     maximumWidth: 400

@@ -13,6 +13,13 @@
 #include <QJsonArray>
 #include <QCryptographicHash>
 #include <QDateTime>
+#include <QDrag>
+#include <QMimeData>
+#include <QPixmap>
+#include <QQuickItem>
+#include <QQuickItemGrabResult>
+#include <QGuiApplication>
+
 
 bool Utils::allowDropFile(QUrl fileUrl) const {
     QMimeDatabase db;
@@ -235,12 +242,12 @@ QJsonArray Utils::getCollectionAssets(int key) const {
 
 QString Utils::normalizeFileUrl(const QString& path) const {
     QUrl url(path);
-    
+
     // If it's already a valid local file URL, return it as-is
     if (url.isLocalFile()) {
         return url.toString();
     }
-    
+
     // If it's just a path, convert to proper file URL
     // QUrl::fromLocalFile handles Windows/Unix differences automatically
     return QUrl::fromLocalFile(path).toString();
@@ -248,8 +255,73 @@ QString Utils::normalizeFileUrl(const QString& path) const {
 
 QString Utils::urlToLocalPath(const QString& url) const {
     QUrl qurl(url);
-    
+
     // Qt's toLocalFile() handles all platform differences automatically
     // Returns proper path format for Windows (C:\path) or Unix (/path)
     return qurl.toLocalFile();
+}
+
+void Utils::startImageDrag(const QString& imageUrl, QQuickItem* source) {
+    if (!source) {
+        return;
+    }
+
+    // Create the drag object
+    QDrag* drag = new QDrag(source);
+
+    // Set up MIME data with the correct format for file URLs
+    QMimeData* mimeData = new QMimeData();
+    QUrl url(imageUrl);
+    QList<QUrl> urls;
+    urls.append(url.toLocalFile());
+    qDebug() << urls;
+    mimeData->setUrls(urls);
+
+    // Detect file type and set appropriate MIME type data
+    QMimeDatabase db;
+    QMimeType mimeType = db.mimeTypeForUrl(url);
+    QString mimeTypeName = mimeType.name();
+
+    // Read file data for type-specific MIME data
+    QFile file(url.toLocalFile());
+    if (file.open(QIODevice::ReadOnly)) {
+        QByteArray fileData = file.readAll();
+        file.close();
+
+        // Set type-specific MIME data
+        if (mimeTypeName.startsWith("image/")) {
+            mimeData->setData(mimeTypeName, fileData);
+            mimeData->setImageData(QImage::fromData(fileData));
+        } else if (mimeTypeName.startsWith("audio/")) {
+            mimeData->setData(mimeTypeName, fileData);
+        } else if (mimeTypeName == "application/pdf") {
+            mimeData->setData("application/pdf", fileData);
+        }
+    }
+
+    drag->setMimeData(mimeData);
+
+    // Create drag pixmap directly from image file
+    if (mimeTypeName.startsWith("image/")) {
+        QImage image(url.toLocalFile());
+        if (!image.isNull()) {
+            // Scale down the pixmap if it's too large (max 200px width)
+            QPixmap pixmap = QPixmap::fromImage(image);
+            if (pixmap.width() > 200) {
+                pixmap = pixmap.scaledToWidth(200, Qt::SmoothTransformation);
+            }
+
+            // Set the pixmap with center hotspot for better visual feedback
+            drag->setPixmap(pixmap);
+            drag->setHotSpot(QPoint(pixmap.width() / 2, pixmap.height() / 2));
+        }
+    }
+
+    // Execute the drag operation with CopyAction
+    Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
+
+    // Optional: Handle the result if needed
+    if (dropAction == Qt::CopyAction) {
+        qDebug() << "Drag completed with copy action for:" << imageUrl;
+    }
 }

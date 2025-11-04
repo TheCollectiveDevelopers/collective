@@ -194,6 +194,7 @@ Item {
         target: dropArea
 
         function onEntered(drag) {
+            console.log(drag.formats);
             if (drag.hasUrls) {
                 for (var url of drag.urls) {
                     if (utils.allowDropFile(url)) {

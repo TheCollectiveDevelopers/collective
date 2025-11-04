@@ -19,6 +19,7 @@
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
 #include <QGuiApplication>
+#include <QImageReader>
 
 
 bool Utils::allowDropFile(QUrl fileUrl) const {
@@ -273,52 +274,51 @@ void Utils::startImageDrag(const QString& imageUrl, QQuickItem* source) {
     QMimeData* mimeData = new QMimeData();
     QUrl url(imageUrl);
     QList<QUrl> urls;
-    urls.append(url.toLocalFile());
+    urls.append(url);  // Fixed: append URL, not string
     qDebug() << urls;
     mimeData->setUrls(urls);
 
-    // Detect file type and set appropriate MIME type data
+    // Detect file type
     QMimeDatabase db;
     QMimeType mimeType = db.mimeTypeForUrl(url);
     QString mimeTypeName = mimeType.name();
 
-    // Read file data for type-specific MIME data
-    QFile file(url.toLocalFile());
-    if (file.open(QIODevice::ReadOnly)) {
-        QByteArray fileData = file.readAll();
-        file.close();
-
-        // Set type-specific MIME data
-        if (mimeTypeName.startsWith("image/")) {
-            mimeData->setData(mimeTypeName, fileData);
-            mimeData->setImageData(QImage::fromData(fileData));
-        } else if (mimeTypeName.startsWith("audio/")) {
-            mimeData->setData(mimeTypeName, fileData);
-        } else if (mimeTypeName == "application/pdf") {
-            mimeData->setData("application/pdf", fileData);
+    // For images, create drag pixmap efficiently
+    if (mimeTypeName.startsWith("image/")) {
+        QString localPath = url.toLocalFile();
+        
+        // Load image directly at target size to avoid scaling
+        QImageReader reader(localPath);
+        
+        if (reader.canRead()) {
+            // Calculate target size (max 200px width, maintain aspect ratio)
+            QSize imageSize = reader.size();
+            if (imageSize.width() > 200) {
+                imageSize.scale(200, 200, Qt::KeepAspectRatio);
+                reader.setScaledSize(imageSize);
+            }
+            
+            // Load the already-scaled image
+            QImage image = reader.read();
+            
+            if (!image.isNull()) {
+                QPixmap pixmap = QPixmap::fromImage(image);
+                drag->setPixmap(pixmap);
+                drag->setHotSpot(QPoint(pixmap.width() / 2, pixmap.height() / 2));
+                
+                // Set image data using the already-loaded image
+                mimeData->setImageData(image);
+            }
         }
     }
 
     drag->setMimeData(mimeData);
-
-    // Create drag pixmap directly from image file
-    if (mimeTypeName.startsWith("image/")) {
-        QImage image(url.toLocalFile());
-        if (!image.isNull()) {
-            // Scale down the pixmap if it's too large (max 200px width)
-            QPixmap pixmap = QPixmap::fromImage(image);
-            if (pixmap.width() > 200) {
-                pixmap = pixmap.scaledToWidth(200, Qt::SmoothTransformation);
-            }
-
-            // Set the pixmap with center hotspot for better visual feedback
-            drag->setPixmap(pixmap);
-            drag->setHotSpot(QPoint(pixmap.width() / 2, pixmap.height() / 2));
-        }
-    }
+    qDebug() << "finished setting up mimeData";
 
     // Execute the drag operation with CopyAction
+    qDebug() << "before Performed drop action";
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
+    qDebug() << "Performed drop action";
 
     // Optional: Handle the result if needed
     if (dropAction == Qt::CopyAction) {

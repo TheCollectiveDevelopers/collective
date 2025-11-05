@@ -4,7 +4,8 @@ import QtMultimedia
 import Qt5Compat.GraphicalEffects
 import QtQuick.Controls
 
-WrecordPlayerWindow
+Window{
+    id: recordPlayerWindow
     width: 300
     height: 330
     flags: Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint

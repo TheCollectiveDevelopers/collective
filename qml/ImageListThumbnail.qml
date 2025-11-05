@@ -8,6 +8,7 @@ AnimatedImage {
     fillMode: Image.PreserveAspectFit
     required property string uri
     required property int index
+    required property int type
     property Window previewWindow: null
     layer.enabled: true
     layer.effect: OpacityMask {
@@ -23,6 +24,9 @@ AnimatedImage {
     // Hover tracking property
     property bool hovered: false
     signal imageDeleted(index: int)
+
+    // Drag configuration - handled programmatically via Utils
+    property bool isDragging: false
 
     // Semi-transparent overlay for darkening on hover
     Rectangle {
@@ -95,10 +99,14 @@ AnimatedImage {
     }
 
     MouseArea {
+        id: dragArea
         anchors.fill: parent
         preventStealing: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         propagateComposedEvents: true
+
+        property point pressPos: Qt.point(0, 0)
+        property bool dragStarted: false
 
         hoverEnabled: true
         onEntered: {
@@ -110,8 +118,8 @@ AnimatedImage {
 
         onPressed: function (mouse) {
             if (mouse.button === Qt.LeftButton) {
-                console.log("Left clicked on image:", imageDelegate.uri);
-                previewWindow.show()
+                pressPos = Qt.point(mouse.x, mouse.y);
+                dragStarted = false;
             } else if (mouse.button === Qt.RightButton) {
                 console.log("Right clicked on image:", imageDelegate.uri);
                 if(imageDelegate.previewWindow){
@@ -119,14 +127,41 @@ AnimatedImage {
                     imageDelegate.previewWindow = null;
                 }
                 imageDelegate.imageDeleted(imageDelegate.index);
-
             }
+        }
+
+        onPositionChanged: function (mouse) {
+            if (mouse.buttons & Qt.LeftButton && !dragStarted) {
+                // Check if we've moved enough to start a drag (threshold of 5 pixels)
+                var dx = mouse.x - pressPos.x;
+                var dy = mouse.y - pressPos.y;
+                if (Math.sqrt(dx * dx + dy * dy) > 5) {
+                    dragStarted = true;
+                    imageDelegate.isDragging = true;
+                    // Start the drag operation using Utils
+                    // Pass fileUrl (for the actual file), imageUrl (for drag preview), and source item
+                    utils.startDrag(imageDelegate.uri, imageDelegate.uri, imageDelegate);
+                    imageDelegate.isDragging = false;
+                }
+            }
+        }
+
+        onClicked: function (mouse) {
+            if (mouse.button === Qt.LeftButton && !dragStarted) {
+                console.log("Left clicked on image:", imageDelegate.uri);
+                previewWindow.show();
+            }
+        }
+
+        onReleased: function (mouse) {
+            dragStarted = false;
         }
     }
 
     PreviewWindow{
         id: previewWindow
         uri: imageDelegate.uri
+        type: imageDelegate.type
 
         onLockedChanged: {
             if(!locked){

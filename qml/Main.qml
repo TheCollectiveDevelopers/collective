@@ -3,7 +3,7 @@ import Qt.labs.platform
 
 Window {
     id: mainWindow
-    width: 200
+    width: 175
     height: 500
     minimumWidth: 150
     maximumWidth: 400
@@ -61,12 +61,13 @@ Window {
         }
     }
 
-    Shortcut {
-        sequence: "Alt+C"
-        onActivated: {
-            if (mainWindow.visible) {
+    Connections{
+        target: utils
+
+        onToggleVisible: {
+            if(mainWindow.visible){
                 mainWindow.hide();
-            } else {
+            }else{
                 mainWindow.show();
             }
         }

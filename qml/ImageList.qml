@@ -31,7 +31,7 @@ Item {
             console.log(type);
 
             imageList.append({
-                uri: new URL("file://" + asset.uri),
+                uri: utils.normalizeFileUrl(asset.uri),
                 index: imageList.count,
                 type: type
             });
@@ -41,8 +41,8 @@ Item {
     function deleteAssets(){
         for(var i=0; i<imageList.count; i++){
             var asset = imageList.get(i);
-            var urlObj = new URL(asset.uri);
-            if(urlObj.href.includes(".collective")){
+            var localPath = utils.urlToLocalPath(asset.uri);
+            if(localPath.includes(".collective")){
                 utils.deleteAseet(asset.uri);
             }
         }
@@ -57,12 +57,14 @@ Item {
                 type = "image";
             }else if(asset.type === Utils.Music){
                 type = "music";
+            }else if(asset.type === Utils.PDF){
+                type = "pdf";
             }
 
-            var urlObj = new URL(asset.uri);
+            var localPath = utils.urlToLocalPath(asset.uri);
 
             assets.push({
-                uri: urlObj.href.includes(".collective") ? urlObj.pathname : utils.saveAsset(asset.uri),
+                uri: localPath.includes(".collective") ? localPath : utils.saveAsset(asset.uri),
                 index: asset.index,
                 type: type
             });
@@ -102,19 +104,26 @@ Item {
             Component{
                 id: imageDelegate
 
-                ImageListThumbnail{
-                    width: listView.width
-                    uri: loader.uri
-                    index: loader.index
+                Rectangle{
+                    width: childrenRect.width
+                    height: childrenRect.height
+                    radius: 12
+                    color: loader.type === Utils.PDF ? "white" : "transparent"
+                    ImageListThumbnail{
+                        width: listView.width
+                        uri: loader.uri
+                        index: loader.index
+                        type: loader.type
 
-                    onImageDeleted: key => {
-                        for (var i = 0; i < imageList.count; i++) {
-                            if (imageList.get(i).index === key) {
-                                imageList.remove(i, 1);
-                                break;
+                        onImageDeleted: key => {
+                            for (var i = 0; i < imageList.count; i++) {
+                                if (imageList.get(i).index === key) {
+                                    imageList.remove(i, 1);
+                                    break;
+                                }
                             }
+                            imageListContainer.listChanged();
                         }
-                        imageListContainer.listChanged();
                     }
                 }
             }
@@ -151,6 +160,8 @@ Item {
                     return imageDelegate;
                 }else if(type === Utils.Music){
                     return audioDelegate;
+                }else if(type === Utils.PDF){
+                    return imageDelegate;
                 }else{
                     return undefined;
                 }
@@ -194,6 +205,7 @@ Item {
         target: dropArea
 
         function onEntered(drag) {
+            console.log(drag.formats);
             if (drag.hasUrls) {
                 for (var url of drag.urls) {
                     if (utils.allowDropFile(url)) {
@@ -209,16 +221,23 @@ Item {
                     if (utils.detectFileType(url) === Utils.Image || utils.detectFileType(url) === Utils.URL) {
                         console.log("Adding URL:", url);
                         imageList.append({
-                            uri: url,
+                            uri: utils.normalizeFileUrl(url),
                             index: imageList.count,
                             type: Utils.Image
                         });
                         imageListContainer.listChanged();
                     } else if (utils.detectFileType(url) === Utils.Music) {
                         imageList.append({
-                            uri: url,
+                            uri: utils.normalizeFileUrl(url),
                             index: imageList.count,
                             type: Utils.Music
+                        });
+                        imageListContainer.listChanged();
+                    }else if(utils.detectFileType(url) === Utils.PDF){
+                        imageList.append({
+                            uri: utils.normalizeFileUrl(url),
+                            index: imageList.count,
+                            type: Utils.PDF
                         });
                         imageListContainer.listChanged();
                     }

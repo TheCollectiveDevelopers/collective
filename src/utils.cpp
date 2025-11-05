@@ -13,6 +13,15 @@
 #include <QJsonArray>
 #include <QCryptographicHash>
 #include <QDateTime>
+#include <QDrag>
+#include <QMimeData>
+#include <QPixmap>
+#include <QQuickItem>
+#include <QQuickItemGrabResult>
+#include <QGuiApplication>
+#include <QImageReader>
+#include <qnamespace.h>
+
 
 bool Utils::allowDropFile(QUrl fileUrl) const {
     QMimeDatabase db;
@@ -88,7 +97,7 @@ QString Utils::saveAsset(QUrl url) const {
     if (url.isLocalFile()) {
         QString sourcePath = url.toLocalFile();
         QFileInfo fileInfo(sourcePath);
-        
+
         // Read file contents for hash
         QFile sourceFile(sourcePath);
         if (!sourceFile.open(QIODevice::ReadOnly)) {
@@ -96,7 +105,7 @@ QString Utils::saveAsset(QUrl url) const {
         }
         QByteArray fileData = sourceFile.readAll();
         sourceFile.close();
-        
+
         QCryptographicHash hash(QCryptographicHash::Md5);
         hash.addData(fileData);
         QString fileName = hash.result().toHex() + "." + fileInfo.suffix();
@@ -231,4 +240,60 @@ QJsonArray Utils::getCollectionAssets(int key) const {
     }
 
     return QJsonArray();
+}
+
+QString Utils::normalizeFileUrl(const QString& path) const {
+    QUrl url(path);
+    if (url.isLocalFile()) {
+        return url.toString();
+    }
+    return QUrl::fromLocalFile(path).toString();
+}
+
+QString Utils::urlToLocalPath(const QString& url) const {
+    QUrl qurl(url);
+    return qurl.toLocalFile();
+}
+
+void Utils::startDrag(const QString& fileUrl, const QString& imageUrl, QQuickItem* source) {
+    if (!source) {
+        return;
+    }
+
+    QDrag* drag = new QDrag(source);
+
+    QMimeData* mimeData = new QMimeData();
+    QUrl url(fileUrl);
+    QList<QUrl> urls;
+    urls.append(url);
+    mimeData->setUrls(urls);
+
+    if (!imageUrl.isEmpty()) {
+        QUrl imgUrl(imageUrl);
+        QString imagePath = imgUrl.toLocalFile();
+
+        if (!imagePath.isEmpty() && QFile::exists(imagePath)) {
+            QImageReader reader(imagePath);
+
+            if (reader.canRead()) {
+                QSize imageSize = reader.size();
+                if (imageSize.width() > 200) {
+                    imageSize.scale(200, 200, Qt::KeepAspectRatio);
+                    reader.setScaledSize(imageSize);
+                }
+
+                // Load the scaled image
+                QImage image = reader.read();
+
+                if (!image.isNull()) {
+                    QPixmap pixmap = QPixmap::fromImage(image);
+                    drag->setPixmap(pixmap);
+                    drag->setHotSpot(QPoint(pixmap.width() / 2, pixmap.height() / 2));
+                }
+            }
+        }
+    }
+
+    drag->setMimeData(mimeData);
+    Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::LinkAction | Qt::MoveAction, Qt::CopyAction);
 }

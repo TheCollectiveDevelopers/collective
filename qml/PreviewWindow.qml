@@ -10,6 +10,7 @@ Window {
     color: "transparent"
 
     property string uri
+    property int type
     property int resizeMargin: 8
     property int cornerSize: 16
 
@@ -20,11 +21,21 @@ Window {
     property bool isRotating: false
     property bool isOpacity: false
     property bool isMirrored: false
+    property bool isOverPageNumbers: false
+
+
+    Connections{
+        target: utils
+
+        onCloseAllPreviewWindows: {
+            previewWindow.close();
+        }
+    }
 
     Rectangle {
         id: previewImageRectangle
         anchors.fill: parent
-        color: "#1a1a1a"
+        color: previewWindow.type === Utils.Image ? "#1a1a1a" : "white"
 
         radius: 17
 
@@ -61,6 +72,7 @@ Window {
             width: previewImageRectangle.updatedImageWidth * previewImageRectangle.globalScalingFactor
             height: previewImageRectangle.updatedImageHeight * previewImageRectangle.globalScalingFactor
             rotation: previewImageRectangle.globalRotationAngle
+            playing: previewWindow.type === Utils.Image
 
             mirror: previewWindow.isMirrored
             fillMode: Image.PreserveAspectCrop
@@ -69,12 +81,60 @@ Window {
             source: previewWindow.uri
         }
 
+        Rectangle{
+            id: paginationElement
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.margins: 10
+            z: 20
+            visible: previewWindow.type === Utils.PDF
+
+            width: 50
+            height: 30
+            color: "#1a1a1a"
+            radius: 30
+
+            Text{
+                color: "white"
+                anchors.centerIn: parent
+
+                text: (previewImage.currentFrame+1) + "/" + previewImage.frameCount
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                propagateComposedEvents: true
+                cursorShape: Qt.PointingHandCursor
+
+                onEntered: {
+                    previewWindow.isOverPageNumbers = true;
+                }
+
+                onExited: {
+                    previewWindow.isOverPageNumbers = false;
+                }
+
+                onWheel: {
+                    var scrollAmount = wheel.angleDelta.y / 120;
+                    if (scrollAmount < 0) {
+                        if (previewImage.currentFrame < previewImage.frameCount - 1) {
+                            previewImage.currentFrame += 1;
+                        }
+                    } else {
+                        if (previewImage.currentFrame > 0) {
+                            previewImage.currentFrame -= 1;
+                        }
+                    }
+                }
+            }
+        }
+
         MouseArea {
             id: imageMoveArea
             anchors.fill: parent
             propagateComposedEvents: true
             drag.target: !previewWindow.isRotating ? previewImage : undefined
-            enabled: !previewWindow.locked
+            enabled: !previewWindow.locked && !previewWindow.isOverPageNumbers
 
             property real startAngle: 0
             property real startGlobalRotation: 0

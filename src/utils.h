@@ -6,6 +6,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QQuickItem>
+#include <qtmetamacros.h>
 
 class Utils : public QObject {
     Q_OBJECT
@@ -22,4 +24,11 @@ public:
     Q_INVOKABLE void saveCollections(QJsonArray collections) const;
     Q_INVOKABLE QJsonArray loadCollections() const;
     Q_INVOKABLE QJsonArray getCollectionAssets(int key) const;
+    Q_INVOKABLE QString normalizeFileUrl(const QString& path) const;
+    Q_INVOKABLE QString urlToLocalPath(const QString& url) const;
+    Q_INVOKABLE void startDrag(const QString& fileUrl, const QString& imageUrl, QQuickItem* source);
+signals:
+    void toggleVisible();
+    void closeAllPreviewWindows();
+    void closeAllUnfocusedWindows();
 };

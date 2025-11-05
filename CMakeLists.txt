@@ -4,9 +4,11 @@ project(collective VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Qml Quick Widgets Core Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Qml Quick Widgets Core Multimedia DBus)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 qt_standard_project_setup(REQUIRES 6.8)
+
+add_subdirectory(third_party/qhotkey)
 
 qt_add_executable(appcollective
     main.cpp
@@ -80,6 +82,8 @@ target_link_libraries(appcollective
     PRIVATE Qt6::Core
     PRIVATE Qt6::Multimedia
     PRIVATE Qt6::Qml
+    PRIVATE Qt6::DBus
+    PRIVATE qhotkey
 )
 
 include(GNUInstallDirs)

@@ -57,6 +57,8 @@ Item {
                 type = "image";
             }else if(asset.type === Utils.Music){
                 type = "music";
+            }else if(asset.type === Utils.PDF){
+                type = "pdf";
             }
 
             var localPath = utils.urlToLocalPath(asset.uri);
@@ -102,19 +104,26 @@ Item {
             Component{
                 id: imageDelegate
 
-                ImageListThumbnail{
-                    width: listView.width
-                    uri: loader.uri
-                    index: loader.index
+                Rectangle{
+                    width: childrenRect.width
+                    height: childrenRect.height
+                    radius: 12
+                    color: loader.type === Utils.PDF ? "white" : "transparent"
+                    ImageListThumbnail{
+                        width: listView.width
+                        uri: loader.uri
+                        index: loader.index
+                        type: loader.type
 
-                    onImageDeleted: key => {
-                        for (var i = 0; i < imageList.count; i++) {
-                            if (imageList.get(i).index === key) {
-                                imageList.remove(i, 1);
-                                break;
+                        onImageDeleted: key => {
+                            for (var i = 0; i < imageList.count; i++) {
+                                if (imageList.get(i).index === key) {
+                                    imageList.remove(i, 1);
+                                    break;
+                                }
                             }
+                            imageListContainer.listChanged();
                         }
-                        imageListContainer.listChanged();
                     }
                 }
             }
@@ -151,6 +160,8 @@ Item {
                     return imageDelegate;
                 }else if(type === Utils.Music){
                     return audioDelegate;
+                }else if(type === Utils.PDF){
+                    return imageDelegate;
                 }else{
                     return undefined;
                 }
@@ -220,6 +231,13 @@ Item {
                             uri: utils.normalizeFileUrl(url),
                             index: imageList.count,
                             type: Utils.Music
+                        });
+                        imageListContainer.listChanged();
+                    }else if(utils.detectFileType(url) === Utils.PDF){
+                        imageList.append({
+                            uri: utils.normalizeFileUrl(url),
+                            index: imageList.count,
+                            type: Utils.PDF
                         });
                         imageListContainer.listChanged();
                     }

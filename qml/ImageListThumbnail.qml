@@ -8,6 +8,7 @@ AnimatedImage {
     fillMode: Image.PreserveAspectFit
     required property string uri
     required property int index
+    required property int type
     property Window previewWindow: null
     layer.enabled: true
     layer.effect: OpacityMask {
@@ -160,6 +161,7 @@ AnimatedImage {
     PreviewWindow{
         id: previewWindow
         uri: imageDelegate.uri
+        type: imageDelegate.type
 
         onLockedChanged: {
             if(!locked){

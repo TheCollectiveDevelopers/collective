@@ -20,6 +20,7 @@
 #include <QQuickItemGrabResult>
 #include <QGuiApplication>
 #include <QImageReader>
+#include <qnamespace.h>
 
 
 bool Utils::allowDropFile(QUrl fileUrl) const {
@@ -243,85 +244,56 @@ QJsonArray Utils::getCollectionAssets(int key) const {
 
 QString Utils::normalizeFileUrl(const QString& path) const {
     QUrl url(path);
-
-    // If it's already a valid local file URL, return it as-is
     if (url.isLocalFile()) {
         return url.toString();
     }
-
-    // If it's just a path, convert to proper file URL
-    // QUrl::fromLocalFile handles Windows/Unix differences automatically
     return QUrl::fromLocalFile(path).toString();
 }
 
 QString Utils::urlToLocalPath(const QString& url) const {
     QUrl qurl(url);
-
-    // Qt's toLocalFile() handles all platform differences automatically
-    // Returns proper path format for Windows (C:\path) or Unix (/path)
     return qurl.toLocalFile();
 }
 
-void Utils::startImageDrag(const QString& imageUrl, QQuickItem* source) {
+void Utils::startDrag(const QString& fileUrl, const QString& imageUrl, QQuickItem* source) {
     if (!source) {
         return;
     }
 
-    // Create the drag object
     QDrag* drag = new QDrag(source);
 
-    // Set up MIME data with the correct format for file URLs
     QMimeData* mimeData = new QMimeData();
-    QUrl url(imageUrl);
+    QUrl url(fileUrl);
     QList<QUrl> urls;
-    urls.append(url);  // Fixed: append URL, not string
-    qDebug() << urls;
+    urls.append(url);
     mimeData->setUrls(urls);
 
-    // Detect file type
-    QMimeDatabase db;
-    QMimeType mimeType = db.mimeTypeForUrl(url);
-    QString mimeTypeName = mimeType.name();
+    if (!imageUrl.isEmpty()) {
+        QUrl imgUrl(imageUrl);
+        QString imagePath = imgUrl.toLocalFile();
 
-    // For images, create drag pixmap efficiently
-    if (mimeTypeName.startsWith("image/")) {
-        QString localPath = url.toLocalFile();
-        
-        // Load image directly at target size to avoid scaling
-        QImageReader reader(localPath);
-        
-        if (reader.canRead()) {
-            // Calculate target size (max 200px width, maintain aspect ratio)
-            QSize imageSize = reader.size();
-            if (imageSize.width() > 200) {
-                imageSize.scale(200, 200, Qt::KeepAspectRatio);
-                reader.setScaledSize(imageSize);
-            }
-            
-            // Load the already-scaled image
-            QImage image = reader.read();
-            
-            if (!image.isNull()) {
-                QPixmap pixmap = QPixmap::fromImage(image);
-                drag->setPixmap(pixmap);
-                drag->setHotSpot(QPoint(pixmap.width() / 2, pixmap.height() / 2));
-                
-                // Set image data using the already-loaded image
-                mimeData->setImageData(image);
+        if (!imagePath.isEmpty() && QFile::exists(imagePath)) {
+            QImageReader reader(imagePath);
+
+            if (reader.canRead()) {
+                QSize imageSize = reader.size();
+                if (imageSize.width() > 200) {
+                    imageSize.scale(200, 200, Qt::KeepAspectRatio);
+                    reader.setScaledSize(imageSize);
+                }
+
+                // Load the scaled image
+                QImage image = reader.read();
+
+                if (!image.isNull()) {
+                    QPixmap pixmap = QPixmap::fromImage(image);
+                    drag->setPixmap(pixmap);
+                    drag->setHotSpot(QPoint(pixmap.width() / 2, pixmap.height() / 2));
+                }
             }
         }
     }
 
     drag->setMimeData(mimeData);
-    qDebug() << "finished setting up mimeData";
-
-    // Execute the drag operation with CopyAction
-    qDebug() << "before Performed drop action";
-    Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
-    qDebug() << "Performed drop action";
-
-    // Optional: Handle the result if needed
-    if (dropAction == Qt::CopyAction) {
-        qDebug() << "Drag completed with copy action for:" << imageUrl;
-    }
+    Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::LinkAction | Qt::MoveAction, Qt::CopyAction);
 }

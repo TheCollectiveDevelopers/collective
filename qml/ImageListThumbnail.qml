@@ -138,7 +138,8 @@ AnimatedImage {
                     dragStarted = true;
                     imageDelegate.isDragging = true;
                     // Start the drag operation using Utils
-                    utils.startImageDrag(imageDelegate.uri, imageDelegate);
+                    // Pass fileUrl (for the actual file), imageUrl (for drag preview), and source item
+                    utils.startDrag(imageDelegate.uri, imageDelegate.uri, imageDelegate);
                     imageDelegate.isDragging = false;
                 }
             }

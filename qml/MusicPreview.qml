@@ -23,6 +23,8 @@ Rectangle{
     color: "black"
     radius: 12
 
+
+
     CollectiveMediaPlayer{
         id: mediaPlayer
         source: musicPreview.uri

@@ -61,12 +61,13 @@ Window {
         }
     }
 
-    Shortcut {
-        sequence: "Alt+C"
-        onActivated: {
-            if (mainWindow.visible) {
+    Connections{
+        target: utils
+
+        onToggleVisible: {
+            if(mainWindow.visible){
                 mainWindow.hide();
-            } else {
+            }else{
                 mainWindow.show();
             }
         }

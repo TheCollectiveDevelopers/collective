@@ -4,8 +4,7 @@ import QtMultimedia
 import Qt5Compat.GraphicalEffects
 import QtQuick.Controls
 
-Window{
-    id: recordPlayerWindow
+WrecordPlayerWindow
     width: 300
     height: 330
     flags: Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
@@ -19,6 +18,14 @@ Window{
     FontLoader{
         id: calSans
         source: "qrc:/qt/qml/collective/assets/calsans.ttf"
+    }
+
+    Connections{
+        target: utils
+
+        onCloseAllPreviewWindows: {
+            recordPlayerWindow.close();
+        }
     }
 
     Rectangle {

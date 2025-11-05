@@ -8,6 +8,8 @@ Rectangle{
 
     required property url uri
     required property int index
+    property bool isDragging: false
+    z: 10
 
     FontLoader{
         id: shAdGrotesk
@@ -22,8 +24,6 @@ Rectangle{
     height: 70
     color: "black"
     radius: 12
-
-
 
     CollectiveMediaPlayer{
         id: mediaPlayer
@@ -59,12 +59,49 @@ Rectangle{
                 }
             }
 
-            MouseArea{
+            MouseArea {
+                id: dragArea
                 anchors.fill: parent
+                preventStealing: true
+                acceptedButtons: Qt.LeftButton
                 propagateComposedEvents: true
+                z: 10
 
-                onClicked: {
-                    recordPlayer.show()
+                property point pressPos: Qt.point(0, 0)
+                property bool dragStarted: false
+
+                onPressed: mouse => {
+                    console.log("pressed music");
+                    if (mouse.button === Qt.LeftButton) {
+                        pressPos = Qt.point(mouse.x, mouse.y);
+                        dragStarted = false;
+                    }
+                }
+
+                onPositionChanged: function (mouse) {
+                    if (mouse.buttons & Qt.LeftButton && !dragStarted) {
+                        // Check if we've moved enough to start a drag (threshold of 5 pixels)
+                        var dx = mouse.x - pressPos.x;
+                        var dy = mouse.y - pressPos.y;
+                        if (Math.sqrt(dx * dx + dy * dy) > 5) {
+                            dragStarted = true;
+                            musicPreview.isDragging = true;
+                            // Start the drag operation using Utils
+                            // Pass fileUrl (for the actual file), imageUrl (for drag preview), and source item
+                            utils.startDrag(musicPreview.uri, mediaPlayer.coverArtUrl, musicPreview);
+                            musicPreview.isDragging = false;
+                        }
+                    }
+                }
+
+                onClicked: function (mouse) {
+                    if (mouse.button === Qt.LeftButton && !dragStarted) {
+                        recordPlayer.show();
+                    }
+                }
+
+                onReleased: function (mouse) {
+                    dragStarted = false;
                 }
             }
         }
@@ -108,6 +145,7 @@ Rectangle{
                 MouseArea{
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
+                    propagateComposedEvents: true
                     onClicked: {
                         if(mediaPlayer.playing){
                             mediaPlayer.pause()

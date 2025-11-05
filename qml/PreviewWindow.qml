@@ -21,6 +21,14 @@ Window {
     property bool isOpacity: false
     property bool isMirrored: false
 
+    Connections{
+        target: utils
+
+        onCloseAllPreviewWindows: {
+            previewWindow.close();
+        }
+    }
+
     Rectangle {
         id: previewImageRectangle
         anchors.fill: parent

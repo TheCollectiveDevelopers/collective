@@ -29,7 +29,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          modules: 'qtmultimedia qtpdf'
+          modules: 'qtmultimedia qtpdf qt5compat'
           arch: 'win64_msvc2022_64'
           cache: true
 
@@ -85,7 +85,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          modules: 'qtmultimedia qtpdf'
+          modules: 'qtmultimedia qtpdf qt5compat'
           cache: true
 
       - name: Setup CMake

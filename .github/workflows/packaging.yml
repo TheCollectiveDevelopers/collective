@@ -27,7 +27,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          modules: 'qtmultimedia qtquick qtwidgets'
+          modules: 'qtmultimedia'
           cache: true
 
       - name: Setup CMake
@@ -70,7 +70,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          modules: 'qtmultimedia qtquick qtwidgets'
+          modules: 'qtmultimedia'
           cache: true
 
       - name: Setup CMake
@@ -128,7 +128,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          modules: 'qtmultimedia qtquick qtwidgets'
+          modules: 'qtmultimedia'
           cache: true
 
       - name: Setup CMake

@@ -1,0 +1,240 @@
+name: Build and Package
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  QT_VERSION: '6.10.0'
+  CMAKE_VERSION: '3.28.x'
+  APP_NAME: 'collective'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          modules: 'qtmultimedia qtquick qtwidgets'
+          cache: true
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: ${{ env.CMAKE_VERSION }}
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Deploy Qt dependencies
+        run: |
+          cd build/Release
+          windeployqt appcollective.exe --qmldir ../../qml --release --compiler-runtime
+
+      - name: Create installer directory
+        run: |
+          mkdir installer
+          xcopy build\Release installer\ /E /I /Y
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: collective-windows
+          path: installer/
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          modules: 'qtmultimedia qtquick qtwidgets'
+          cache: true
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: ${{ env.CMAKE_VERSION }}
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Deploy Qt dependencies
+        run: |
+          macdeployqt build/appcollective.app -qmldir=qml -dmg
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: collective-macos
+          path: build/*.dmg
+
+  build-linux-appimage:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1-mesa-dev \
+            libxkbcommon-x11-0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-render-util0 \
+            libxcb-xinerama0 \
+            libxcb-cursor0 \
+            libxcb-shape0 \
+            libdbus-1-dev \
+            libpulse-dev \
+            libasound2-dev \
+            libgstreamer1.0-dev \
+            libgstreamer-plugins-base1.0-dev \
+            file \
+            wget
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          modules: 'qtmultimedia qtquick qtwidgets'
+          cache: true
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: ${{ env.CMAKE_VERSION }}
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Install to AppDir
+        run: |
+          DESTDIR=AppDir cmake --install build
+
+      - name: Download linuxdeploy and Qt plugin
+        run: |
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy*.AppImage
+
+      - name: Create AppImage
+        env:
+          QMAKE: ${{ env.Qt6_DIR }}/bin/qmake
+        run: |
+          # Create wrapper script
+          cat > AppDir/usr/bin/appcollective-wrapper.sh <<EOF
+          #!/bin/bash
+          export QT_QPA_PLATFORM=xcb
+          DIR="\$(dirname "\$(readlink -f "\$0")")"
+          exec "\$DIR/appcollective" "\$@"
+          EOF
+          chmod +x AppDir/usr/bin/appcollective-wrapper.sh
+
+          # Create desktop file
+          cat > collective.desktop <<EOF
+          [Desktop Entry]
+          Type=Application
+          Name=Collective
+          Exec=appcollective-wrapper.sh
+          Icon=collective
+          Categories=Utility;
+          Terminal=false
+          EOF
+
+          # Copy icon
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+          cp assets/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/collective.png
+
+          # Set environment variables for linuxdeploy
+          export QML_SOURCES_PATHS=qml
+          export EXTRA_QT_PLUGINS="multimedia"
+
+          # Create AppImage
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --plugin qt \
+            --desktop-file=collective.desktop \
+            --icon-file=assets/icon.png \
+            --output appimage
+
+      - name: Rename AppImage
+        run: |
+          mv Collective-*.AppImage collective-x86_64.AppImage || true
+          ls -la *.AppImage
+
+      - name: Upload Linux AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: collective-linux-appimage
+          path: "*.AppImage"
+
+  release:
+    needs: [build-windows, build-macos, build-linux-appimage]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create archives
+        run: |
+          cd artifacts/collective-windows
+          zip -r ../../collective-windows.zip .
+          cd ../collective-linux-appimage
+          cp *.AppImage ../../
+          cd ../..
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            collective-windows.zip
+            artifacts/collective-macos/*.dmg
+            *.AppImage
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

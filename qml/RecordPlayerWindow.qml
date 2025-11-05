@@ -24,13 +24,21 @@ Window{
     Rectangle {
         id: expandedAlbumArtContainer
         anchors.fill: parent
-        visible: expandedView
+        visible: opacity > 0
+        opacity: expandedView ? 1 : 0
         z: 0
         color: "transparent"
         border.width: 30
         border.color: '#000000'
         radius: 17
         clip: true
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.InOutQuad
+            }
+        }
 
         Image{
             id: expandedAlbumArt
@@ -187,7 +195,15 @@ Window{
                     anchors.centerIn: parent
                     width: 150
                     height: 150
-                    visible: !expandedView
+                    visible: opacity > 0
+                    opacity: expandedView ? 0 : 1
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 300
+                            easing.type: Easing.InOutQuad
+                        }
+                    }
 
                     Image{
                         id: recordDisk

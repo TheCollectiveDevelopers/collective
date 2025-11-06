@@ -65,6 +65,10 @@ jobs:
           pip install aqtinstall
           aqt install-tool windows desktop tools_ifw --outputdir ${{ github.workspace }}\Qt
 
+      - name: Copy installer icon to IFW config
+        run: |
+          copy assets\icon.ico packaging\windows\ifw\config\installer-icon.ico
+
       - name: Copy application to IFW package data
         run: |
           xcopy installer\* packaging\windows\ifw\packages\com.collective.app\data\ /E /I /Y
@@ -73,6 +77,23 @@ jobs:
         run: |
           $IFW_PATH = Get-ChildItem -Path "${{ github.workspace }}\Qt\Tools\QtInstallerFramework" -Directory | Select-Object -First 1
           & "$IFW_PATH\bin\binarycreator.exe" -c packaging\windows\ifw\config\config.xml -p packaging\windows\ifw\packages collective-windows-x86_64-installer.exe --offline-only
+
+      - name: Create self-signed certificate
+        run: |
+          $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=Collective, O=Collective, C=US" -CertStoreLocation "Cert:\CurrentUser\My" -NotAfter (Get-Date).AddYears(5)
+          $password = ConvertTo-SecureString -String "${{ secrets.CERT_PASSWORD }}" -Force -AsPlainText
+          Export-PfxCertificate -Cert "Cert:\CurrentUser\My\$($cert.Thumbprint)" -FilePath "${{ github.workspace }}\certificate.pfx" -Password $password
+
+      - name: Sign installer
+        run: |
+          # Find signtool in Windows SDK
+          $signtool = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($signtool) {
+            & $signtool.FullName sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer.exe
+          } else {
+            Write-Host "signtool not found, trying from PATH"
+            signtool sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer.exe
+          }
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1

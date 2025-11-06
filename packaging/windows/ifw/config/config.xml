@@ -6,6 +6,8 @@
     <Publisher>Collective</Publisher>
     <StartMenuDir>Collective</StartMenuDir>
     <TargetDir>@ApplicationsDir@/Collective</TargetDir>
+    <InstallerWindowIcon>installer-icon</InstallerWindowIcon>
+    <InstallerApplicationIcon>installer-icon</InstallerApplicationIcon>
     <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
     <AllowSpaceInPath>true</AllowSpaceInPath>
 </Installer>

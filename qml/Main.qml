@@ -283,6 +283,10 @@ Window {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width - 10
 
+                    onSavedCollectionsLoaded: key => {
+                        mainWindow.currentImageListKey = key;
+                    }
+
                     onLoadedChanged: {
                         if(workspaceSwitcher.loaded){
                             mainWindow.imageListMap[mainWindow.currentImageListKey].visible = false;

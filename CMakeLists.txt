@@ -10,8 +10,10 @@ qt_standard_project_setup(REQUIRES 6.8)
 
 add_subdirectory(third_party/qhotkey)
 
+set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/assets/app.rc")
 qt_add_executable(appcollective
     main.cpp
+    ${app_icon_resource_windows}
 )
 
 qt_add_qml_module(appcollective

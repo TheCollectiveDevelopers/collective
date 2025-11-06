@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>Collective</DisplayName>
+    <Description>Install Collective application</Description>
+    <Version>1.0.0</Version>
+    <ReleaseDate>2024-01-01</ReleaseDate>
+    <Default>true</Default>
+    <Script>installscript.qs</Script>
+    <Essential>true</Essential>
+</Package>

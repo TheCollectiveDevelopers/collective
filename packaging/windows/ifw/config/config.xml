@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Collective</Name>
+    <Version>1.0.0</Version>
+    <Title>Collective Installer</Title>
+    <Publisher>Collective</Publisher>
+    <StartMenuDir>Collective</StartMenuDir>
+    <TargetDir>@ApplicationsDir@/Collective</TargetDir>
+    <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
+    <AllowSpaceInPath>true</AllowSpaceInPath>
+</Installer>

@@ -83,3 +83,4 @@ CMakeLists.txt.user*
 .vscode
 run.sh
 .cache
+!packaging/windows/ifw/packages/com.collective.app

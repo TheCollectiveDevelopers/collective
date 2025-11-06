@@ -8,6 +8,7 @@ Item {
     signal workspaceCreated(key: int)
     signal workspaceDeleted(key: int)
     signal loadCollectionRequested(key: int)
+    signal savedCollectionsLoaded(key: int)
     property int currentWorkspace: 0
     property int deleteWorkspace
     property bool loaded: false
@@ -15,6 +16,7 @@ Item {
     Component.onCompleted: {
         if(!loaded){
             var collections = utils.loadCollections();
+            workspaceSwitcher.savedCollectionsLoaded(collections[0].key);
 
             if(collections.length === 0){
                 workspaceList.append({

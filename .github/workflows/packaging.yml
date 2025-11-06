@@ -62,9 +62,8 @@ jobs:
 
       - name: Install Qt Installer Framework
         run: |
-          choco install -y wget
-          wget https://download.qt.io/official_releases/qt-installer-framework/4.6/QtInstallerFramework-windows-x64-4.6.0.exe -O ifw-installer.exe
-          Start-Process -Wait -FilePath ifw-installer.exe -ArgumentList "--accept-licenses","--default-answer","--confirm-command","install"
+          pip install aqtinstall
+          aqt install-tool windows desktop tools_ifw --outputdir ${{ github.workspace }}\Qt
 
       - name: Copy application to IFW package data
         run: |
@@ -72,7 +71,8 @@ jobs:
 
       - name: Create offline installer
         run: |
-          & "C:\Program Files\QtIFW-4.6.0\bin\binarycreator.exe" -c packaging\windows\ifw\config\config.xml -p packaging\windows\ifw\packages collective-windows-x86_64-installer.exe --offline-only
+          $IFW_PATH = Get-ChildItem -Path "${{ github.workspace }}\Qt\Tools\QtInstallerFramework" -Directory | Select-Object -First 1
+          & "$IFW_PATH\bin\binarycreator.exe" -c packaging\windows\ifw\config\config.xml -p packaging\windows\ifw\packages collective-windows-x86_64-installer.exe --offline-only
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1

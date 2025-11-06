@@ -1,3 +1,0 @@
-2025-11-05 22:48:08,785 - aqt.helper - DEBUG - helper 140622495386560 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_6100/qt6_6100/Updates.xml.sha256
-2025-11-05 22:48:11,963 - aqt.helper - DEBUG - helper 140622495386560 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/windows_x86/extensions/qtpdf/6100/msvc2022_64/Updates.xml.sha256
-2025-11-05 22:48:14,270 - aqt.helper - DEBUG - helper 140622495386560 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/windows_x86/extensions/qtwebengine/6100/msvc2022_64/Updates.xml.sha256

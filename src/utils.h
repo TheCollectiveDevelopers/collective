@@ -26,7 +26,9 @@ public:
     Q_INVOKABLE QJsonArray getCollectionAssets(int key) const;
     Q_INVOKABLE QString normalizeFileUrl(const QString& path) const;
     Q_INVOKABLE QString urlToLocalPath(const QString& url) const;
-    Q_INVOKABLE void startDrag(const QString& fileUrl, const QString& imageUrl, QQuickItem* source);
+    Q_INVOKABLE void startDrag(const QString& fileUrl, const QString& imageUrl, QQuickItem* source) const;
+    Q_INVOKABLE bool checkUpdates() const;
+    Q_INVOKABLE void performUpdate() const;
 signals:
     void toggleVisible();
     void closeAllPreviewWindows();

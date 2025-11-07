@@ -20,7 +20,10 @@
 #include <QQuickItemGrabResult>
 #include <QGuiApplication>
 #include <QImageReader>
+#include <QProcess>
+#include <QCoreApplication>
 #include <qnamespace.h>
+#include <QtSystemDetection>
 
 
 bool Utils::allowDropFile(QUrl fileUrl) const {
@@ -255,7 +258,7 @@ QString Utils::urlToLocalPath(const QString& url) const {
     return qurl.toLocalFile();
 }
 
-void Utils::startDrag(const QString& fileUrl, const QString& imageUrl, QQuickItem* source) {
+void Utils::startDrag(const QString& fileUrl, const QString& imageUrl, QQuickItem* source) const{
     if (!source) {
         return;
     }
@@ -296,4 +299,67 @@ void Utils::startDrag(const QString& fileUrl, const QString& imageUrl, QQuickIte
 
     drag->setMimeData(mimeData);
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::LinkAction | Qt::MoveAction, Qt::CopyAction);
+}
+
+bool Utils::checkUpdates() const{
+    #ifdef Q_OS_WIN
+    QString appDir = QCoreApplication::applicationDirPath();
+    QString maintenanceToolPath = appDir + "/maintenancetool.exe";
+
+    QFileInfo toolInfo(maintenanceToolPath);
+    if (!toolInfo.exists()) {
+        qDebug() << "Maintenance tool not found at:" << maintenanceToolPath;
+        return false;
+    }
+
+    QProcess process;
+    process.start(maintenanceToolPath, QStringList() << "--checkupdates");
+
+    if (!process.waitForStarted()) {
+        qDebug() << "Failed to start maintenance tool";
+        return false;
+    }
+
+    if (!process.waitForFinished(30000)) { // 30 second timeout
+        qDebug() << "Maintenance tool timed out";
+        process.kill();
+        return false;
+    }
+
+    QString output = process.readAllStandardOutput();
+    QString errorOutput = process.readAllStandardError();
+
+    qDebug() << "Update check output:" << output;
+    qDebug() << "Update check errors:" << errorOutput;
+
+    // Check if updates are available based on exit code
+    // Exit code 0 typically means updates available, 1 means no updates
+    return process.exitCode() == 0;
+    #endif
+
+    #ifdef Q_OS_LINUX
+
+    #endif
+
+    return false;
+}
+
+void Utils::performUpdate() const{
+    #ifdef Q_OS_WIN
+    QString appDir = QCoreApplication::applicationDirPath();
+    QString maintenanceToolPath = appDir + "/maintenancetool.exe";
+
+    QFileInfo toolInfo(maintenanceToolPath);
+    if (!toolInfo.exists()) {
+        qDebug() << "Maintenance tool not found at:" << maintenanceToolPath;
+        return;
+    }
+
+    // Start the maintenance tool in updater mode (non-blocking)
+    QProcess::startDetached(maintenanceToolPath, QStringList() << "--updater");
+    #endif
+
+    #ifdef Q_OS_LINUX
+
+    #endif
 }

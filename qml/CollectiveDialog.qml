@@ -75,18 +75,21 @@ Window {
                     color: "white"
                     font.pixelSize: 14
                     wrapMode: Text.WordWrap
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
                 }
 
                 // Buttons row
                 Row {
                     id: buttonRow
-                    
+
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     spacing: 10
 
                     Rectangle {
                         visible: dialogWindow.buttons & Dialog.Ok
+
                         width: 80
                         height: 35
                         radius: 8
@@ -136,7 +139,7 @@ Window {
                     }
                 }
             }
-            
+
         }
     }
 

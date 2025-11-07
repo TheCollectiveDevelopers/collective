@@ -73,10 +73,20 @@ jobs:
         run: |
           xcopy installer\* packaging\windows\ifw\packages\com.collective.app\data\ /E /I /Y
 
-      - name: Create offline installer
+      - name: Create online installer
         run: |
           $IFW_PATH = Get-ChildItem -Path "${{ github.workspace }}\Qt\Tools\QtInstallerFramework" -Directory | Select-Object -First 1
-          & "$IFW_PATH\bin\binarycreator.exe" -c packaging\windows\ifw\config\config.xml -p packaging\windows\ifw\packages collective-windows-x86_64-installer.exe --offline-only
+          & "$IFW_PATH\bin\binarycreator.exe" -c packaging\windows\ifw\config\config.xml -p packaging\windows\ifw\packages collective-windows-x86_64-installer-online.exe
+
+      - name: Create repository for updates
+        run: |
+          $IFW_PATH = Get-ChildItem -Path "${{ github.workspace }}\Qt\Tools\QtInstallerFramework" -Directory | Select-Object -First 1
+          & "$IFW_PATH\bin\repogen.exe" -p packaging\windows\ifw\packages repository
+
+      - name: Create repository archive
+        run: |
+          cd repository
+          7z a ../collective-windows-repository.7z *
 
       - name: Create self-signed certificate
         run: |
@@ -89,10 +99,10 @@ jobs:
           # Find signtool in Windows SDK
           $signtool = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($signtool) {
-            & $signtool.FullName sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer.exe
+            & $signtool.FullName sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer-online.exe
           } else {
             Write-Host "signtool not found, trying from PATH"
-            signtool sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer.exe
+            signtool sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer-online.exe
           }
 
       - name: Upload to Release
@@ -100,13 +110,23 @@ jobs:
         with:
           files: |
             collective-windows-x86_64.zip
-            collective-windows-x86_64-installer.exe
+            collective-windows-x86_64-installer-online.exe
+            collective-windows-repository.7z
           tag_name: latest
           name: Latest Build
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy repository to GitHub Pages
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repository
+          destination_dir: updates
+          keep_files: false
 
   build-macos:
     runs-on: macos-latest

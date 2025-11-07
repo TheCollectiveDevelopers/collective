@@ -1,0 +1,21 @@
+<Updates>
+ <ApplicationName>{AnyApplication}</ApplicationName>
+ <ApplicationVersion>1.0.0</ApplicationVersion>
+ <Checksum>true</Checksum>
+ <PackageUpdate>
+  <Name>com.collective.app</Name>
+  <DisplayName>Collective</DisplayName>
+  <Description>Install Collective application</Description>
+  <Version>1.0.0-0</Version>
+  <ReleaseDate>2024-01-01</ReleaseDate>
+  <Default>true</Default>
+  <Script>installscript.qs</Script>
+  <Essential>true</Essential>
+  <ForcedInstallation>true</ForcedInstallation>
+  <DownloadableArchives>data.7z</DownloadableArchives>
+  <UpdateFile CompressedSize="39322685" OS="Any" UncompressedSize="139758562"/>
+  <SHA1>42f79d39fd5241c4d97221104732cd698c2d0a23</SHA1>
+ </PackageUpdate>
+ <SHA1>42f79d39fd5241c4d97221104732cd698c2d0a23</SHA1>
+ <MetadataName>2025-11-07-0920_meta.7z</MetadataName>
+</Updates>

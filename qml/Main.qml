@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import Qt.labs.platform
 
@@ -48,6 +49,23 @@ Window {
     //     snapToEdges(mouse.x)
     //   }
     // }
+
+    CollectiveDialog{
+        id: updateDialog
+
+        text: "An update is available! Would you like to update?"
+        buttons: CollectiveDialog.Ok | CollectiveDialog.Cancel
+
+        onAccepted: {
+            utils.performUpdate();
+        }
+
+        Component.onCompleted: {
+            if(utils.checkUpdates()){
+                updateDialog.show();
+            }
+        }
+    }
 
     SystemTrayIcon {
         visible: true

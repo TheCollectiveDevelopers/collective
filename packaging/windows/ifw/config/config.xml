@@ -10,4 +10,22 @@
     <InstallerApplicationIcon>installer-icon</InstallerApplicationIcon>
     <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
     <AllowSpaceInPath>true</AllowSpaceInPath>
+
+    <!-- Online installer and update configuration -->
+    <RemoteRepositories>
+        <Repository>
+            <Url>https://collectiveboard.pages.dev/packages</Url>
+            <Enabled>1</Enabled>
+            <DisplayName>Collective Updates</DisplayName>
+        </Repository>
+    </RemoteRepositories>
+
+    <!-- Maintenance tool configuration -->
+    <MaintenanceToolName>MaintenanceTool</MaintenanceToolName>
+    <AllowUnstableComponents>false</AllowUnstableComponents>
+    <ControlScript>controlscript.qs</ControlScript>
+
+    <!-- Update settings -->
+    <RunProgram>@TargetDir@/appcollective.exe</RunProgram>
+    <RunProgramDescription>Launch Collective</RunProgramDescription>
 </Installer>

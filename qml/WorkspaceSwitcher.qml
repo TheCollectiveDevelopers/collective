@@ -123,9 +123,9 @@ Item {
         }
     }
 
-    Dialog {
+    CollectiveDialog {
         id: deleteDialog
-        buttons: Dialog.Ok | Dialog.Cancel
+        buttons: CollectiveDialog.Ok | CollectiveDialog.Cancel
         text: "Delete this collection?"
 
         onAccepted: {

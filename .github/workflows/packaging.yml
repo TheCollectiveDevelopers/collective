@@ -15,7 +15,27 @@ env:
   APP_NAME: 'collective'
 
 jobs:
+  autotag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.autotag.outputs.tagname }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Auto Tag
+        id: autotag
+        uses: phish108/autotag-action@v1.1.55
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
   build-windows:
+    needs: autotag
+    if: always()
     runs-on: windows-latest
     permissions:
       contents: write
@@ -112,10 +132,10 @@ jobs:
             collective-windows-x86_64.zip
             collective-windows-x86_64-installer-online.exe
             collective-windows-repository.7z
-          tag_name: latest
-          name: Latest Build
+          tag_name: ${{ needs.autotag.outputs.tag || 'latest' }}
+          name: ${{ needs.autotag.outputs.tag || 'Latest Build' }}
           draft: false
-          prerelease: false
+          prerelease: ${{ needs.autotag.outputs.tag == '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -129,6 +149,8 @@ jobs:
           keep_files: false
 
   build-macos:
+    needs: autotag
+    if: always()
     runs-on: macos-latest
     permissions:
       contents: write
@@ -165,14 +187,16 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: build/*.dmg
-          tag_name: latest
-          name: Latest Build
+          tag_name: ${{ needs.autotag.outputs.tag || 'latest' }}
+          name: ${{ needs.autotag.outputs.tag || 'Latest Build' }}
           draft: false
-          prerelease: false
+          prerelease: ${{ needs.autotag.outputs.tag == '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-linux-appimage:
+    needs: autotag
+    if: always()
     runs-on: ubuntu-latest
     permissions:
           contents: write
@@ -292,9 +316,9 @@ jobs:
           files: |
             Collective.AppImage
             Collective.AppImage.zsync
-          tag_name: latest
-          name: Latest Build
+          tag_name: ${{ needs.autotag.outputs.tag || 'latest' }}
+          name: ${{ needs.autotag.outputs.tag || 'Latest Build' }}
           draft: false
-          prerelease: false
+          prerelease: ${{ needs.autotag.outputs.tag == '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

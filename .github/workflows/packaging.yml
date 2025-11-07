@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      tag: ${{ steps.autotag.outputs.tagname }}
+      tag: ${{ steps.autotag.outputs.new-tag}}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

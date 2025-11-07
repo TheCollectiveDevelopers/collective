@@ -13,9 +13,9 @@
   <Essential>true</Essential>
   <ForcedInstallation>true</ForcedInstallation>
   <DownloadableArchives>data.7z</DownloadableArchives>
-  <UpdateFile CompressedSize="39322685" OS="Any" UncompressedSize="139758562"/>
-  <SHA1>42f79d39fd5241c4d97221104732cd698c2d0a23</SHA1>
+  <UpdateFile CompressedSize="39321248" OS="Any" UncompressedSize="139758562"/>
+  <SHA1>6150930532f9ec737d1526362065f689b8b7d43e</SHA1>
  </PackageUpdate>
- <SHA1>42f79d39fd5241c4d97221104732cd698c2d0a23</SHA1>
- <MetadataName>2025-11-07-0920_meta.7z</MetadataName>
+ <SHA1>6150930532f9ec737d1526362065f689b8b7d43e</SHA1>
+ <MetadataName>2025-11-07-0934_meta.7z</MetadataName>
 </Updates>

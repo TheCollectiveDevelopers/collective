@@ -221,21 +221,21 @@ Item {
                     if (utils.detectFileType(url) === Utils.Image || utils.detectFileType(url) === Utils.URL) {
                         console.log("Adding URL:", url);
                         imageList.append({
-                            uri: utils.normalizeFileUrl(url),
+                            uri: utils.normalizeFileUrl(utils.saveAsset(url)),
                             index: imageList.count,
                             type: Utils.Image
                         });
                         imageListContainer.listChanged();
                     } else if (utils.detectFileType(url) === Utils.Music) {
                         imageList.append({
-                            uri: utils.normalizeFileUrl(url),
+                            uri: utils.normalizeFileUrl(utils.saveAsset(url)),
                             index: imageList.count,
                             type: Utils.Music
                         });
                         imageListContainer.listChanged();
                     }else if(utils.detectFileType(url) === Utils.PDF){
                         imageList.append({
-                            uri: utils.normalizeFileUrl(url),
+                            uri: utils.normalizeFileUrl(utils.saveAsset(url)),
                             index: imageList.count,
                             type: Utils.PDF
                         });

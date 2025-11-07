@@ -74,7 +74,11 @@ Window {
 
         onActivated: reason => {
             if (reason === SystemTrayIcon.Trigger) {
-                mainWindow.show();
+                if(mainWindow.visible){
+                    mainWindow.hide();
+                }else{
+                    mainWindow.show();
+                }
             }
         }
 

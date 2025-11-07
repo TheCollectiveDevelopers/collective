@@ -74,7 +74,29 @@ Window {
 
         onActivated: reason => {
             if (reason === SystemTrayIcon.Trigger) {
-                mainWindow.show();
+                if(mainWindow.visible){
+                    mainWindow.hide();
+                }else{
+                    mainWindow.show();
+                }
+            }
+        }
+
+        menu: Menu {
+            MenuItem {
+                text: qsTr("Quit")
+                onTriggered: Qt.quit()
+            }
+
+            MenuItem {
+                text: qsTr("Toggle Dock")
+                onTriggered: utils.toggleVisible()
+
+            }
+
+            MenuItem {
+                text: qsTr("Hide Reference Windows")
+                onTriggered: utils.closeAllPreviewWindows()
             }
         }
     }

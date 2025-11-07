@@ -9,7 +9,7 @@ Window {
     color: "transparent"
 
     property string text: ""
-    property int buttons: Dialog.Ok
+    property int buttons: CollectiveDialog.Ok
     property bool locked: false
 
     signal accepted
@@ -88,7 +88,7 @@ Window {
                     spacing: 10
 
                     Rectangle {
-                        visible: dialogWindow.buttons & Dialog.Ok
+                        visible: dialogWindow.buttons & CollectiveDialog.Ok
 
                         width: 80
                         height: 35
@@ -114,7 +114,7 @@ Window {
                     }
 
                     Rectangle {
-                        visible: dialogWindow.buttons & Dialog.Cancel
+                        visible: dialogWindow.buttons & CollectiveDialog.Cancel
                         width: 80
                         height: 35
                         radius: 8

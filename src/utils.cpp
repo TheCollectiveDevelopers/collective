@@ -25,7 +25,6 @@
 #include <qnamespace.h>
 #include <QtSystemDetection>
 
-
 bool Utils::allowDropFile(QUrl fileUrl) const {
     QMimeDatabase db;
     QMimeType mime = db.mimeTypeForUrl(fileUrl);
@@ -360,6 +359,5 @@ void Utils::performUpdate() const{
     #endif
 
     #ifdef Q_OS_LINUX
-
     #endif
 }

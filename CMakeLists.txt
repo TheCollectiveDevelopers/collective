@@ -87,7 +87,6 @@ target_link_libraries(appcollective
     PRIVATE Qt6::DBus
     PRIVATE qhotkey
 )
-
 include(GNUInstallDirs)
 install(TARGETS appcollective
     BUNDLE DESTINATION .

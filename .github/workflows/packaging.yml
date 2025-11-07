@@ -238,6 +238,7 @@ jobs:
       - name: Create AppImage
         env:
           QMAKE: ${{ env.Qt6_DIR }}/bin/qmake
+          UPDATE_INFORMATION: "zsync|https://collectiveboard.pages.dev/linux/Collective.AppImage.zsync"
         run: |
           # Create wrapper script
           cat > AppDir/usr/bin/appcollective-wrapper.sh <<EOF
@@ -277,13 +278,20 @@ jobs:
 
       - name: Rename AppImage
         run: |
-          mv Collective-*.AppImage collective-x86_64.AppImage || true
+          mv Collective-*.AppImage Collective.AppImage || true
           ls -la *.AppImage
+
+      - name: Generate zsync file
+        run: |
+          sudo apt-get install -y zsync
+          zsyncmake -u https://collectiveboard.pages.dev/linux/Collective.AppImage Collective.AppImage
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
-          files: "*.AppImage"
+          files: |
+            Collective.AppImage
+            Collective.AppImage.zsync
           tag_name: latest
           name: Latest Build
           draft: false

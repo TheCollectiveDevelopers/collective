@@ -82,7 +82,7 @@ Item {
         anchors.margins: 10
         anchors.leftMargin: 0
         anchors.rightMargin: 0
-        visible: imageList.count > 0
+        visible: imageList.count > 0 && !utils.isTrialOver()
         spacing: 10
         layer.enabled: true
         layer.effect: OpacityMask {
@@ -174,8 +174,9 @@ Item {
     Column {
         id: emptyLayout
         anchors.centerIn: parent
+        width: parent.width
         spacing: 20
-        visible: imageList.count == 0
+        visible: imageList.count == 0 || utils.isTrialOver()
 
         Image {
             id: dragImage
@@ -187,11 +188,14 @@ Item {
 
         Text {
             id: dragText
-            text: "Drag and Drop"
+            text: utils.isTrialOver() ? "Get the full version in at collectiveboard.pages.dev!" : "Drag and Drop"
             color: "white"
             font.pixelSize: 18
             font.family: "Arial"
             anchors.horizontalCenter: parent.horizontalCenter
+            wrapMode: Text.Wrap
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 

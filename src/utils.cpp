@@ -24,6 +24,71 @@
 #include <QCoreApplication>
 #include <qnamespace.h>
 #include <QtSystemDetection>
+#include <QClipboard>
+#include <QImage>
+
+bool Utils::isTrialOver() const{
+    #ifdef PAID_VERSION
+    return false;
+    #endif
+
+    const QByteArray SECRET_KEY = "c0ll3ct1v3_tr14l_s3cr3t_k3y_x7f9a2b8";
+
+    QString homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    QString trialDir = homePath + "/.collective";
+    QString trialPath = trialDir + "/trial.dat";
+
+    QDir dir;
+    if (!dir.exists(trialDir)) {
+        dir.mkpath(trialDir);
+    }
+
+    qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+
+    QFile file(trialPath);
+    if (!file.exists()) {
+        // Create new trial file with current timestamp
+        if (file.open(QIODevice::WriteOnly)) {
+            QByteArray data = QByteArray::number(currentTime);
+            QCryptographicHash hash(QCryptographicHash::Sha256);
+            hash.addData(data);
+            hash.addData(SECRET_KEY);
+            QByteArray signature = hash.result();
+
+            file.write(data);
+            file.write("\n");
+            file.write(signature.toHex());
+            file.close();
+        }
+        return false;
+    } else {
+        // Read existing trial file
+        if (file.open(QIODevice::ReadOnly)) {
+            QByteArray fileData = file.readAll();
+            file.close();
+
+            QList<QByteArray> parts = fileData.split('\n');
+            if (parts.size() >= 2) {
+                QByteArray timestampData = parts[0];
+                QByteArray storedSignature = parts[1];
+
+                // Verify signature
+                QCryptographicHash hash(QCryptographicHash::Sha256);
+                hash.addData(timestampData);
+                hash.addData(SECRET_KEY);
+                QByteArray calculatedSignature = hash.result().toHex();
+
+                if (calculatedSignature == storedSignature) {
+                    qint64 firstUseTime = timestampData.toLongLong();
+                    qint64 daysPassed = (currentTime - firstUseTime) / (1000 * 60 * 60 * 24);
+                    return daysPassed >= 7;
+                }
+            }
+        }
+    }
+
+    return false;
+}
 
 bool Utils::allowDropFile(QUrl fileUrl) const {
     QMimeDatabase db;
@@ -360,4 +425,43 @@ void Utils::performUpdate() const{
 
     #ifdef Q_OS_LINUX
     #endif
+}
+
+void Utils::addFileToClipboard(const QString &fileUrl) const{
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    if (!clipboard) {
+        return;
+    }
+
+    QMimeData *mimeData = new QMimeData();
+
+    // Convert the file URL to a QUrl and add it to the MIME data
+    QUrl url(fileUrl);
+    QList<QUrl> urls;
+    urls.append(url);
+    mimeData->setUrls(urls);
+
+    // If it's a local file, also set the raw data with appropriate MIME type
+    QString localPath = url.toLocalFile();
+    if (!localPath.isEmpty() && QFile::exists(localPath)) {
+        QMimeDatabase db;
+        QMimeType mimeType = db.mimeTypeForFile(localPath);
+
+        if (mimeType.name().startsWith("image/")) {
+            QImage image(localPath);
+            if (!image.isNull()) {
+                mimeData->setImageData(image);
+            }
+        } else if (mimeType.name().startsWith("audio/") || mimeType.name() == "application/pdf") {
+            QFile file(localPath);
+            if (file.open(QIODevice::ReadOnly)) {
+                QByteArray fileData = file.readAll();
+                file.close();
+                mimeData->setData(mimeType.name(), fileData);
+            }
+        }
+    }
+
+    // Set the MIME data to the clipboard
+    clipboard->setMimeData(mimeData);
 }

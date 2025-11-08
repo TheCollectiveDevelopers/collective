@@ -23,6 +23,7 @@ Window {
     property int currentImageListKey: 0
     property var imageListMap: ({})
     property bool isUnsaved: false
+    property bool isTrialOver: utils.isTrialOver()
 
     // Check if window is snapped to left edge
     property bool isSnappedToLeft: Math.abs(x - edgePadding) < 5
@@ -74,7 +75,29 @@ Window {
 
         onActivated: reason => {
             if (reason === SystemTrayIcon.Trigger) {
-                mainWindow.show();
+                if(mainWindow.visible){
+                    mainWindow.hide();
+                }else{
+                    mainWindow.show();
+                }
+            }
+        }
+
+        menu: Menu {
+            MenuItem {
+                text: qsTr("Quit")
+                onTriggered: Qt.quit()
+            }
+
+            MenuItem {
+                text: qsTr("Toggle Dock")
+                onTriggered: utils.toggleVisible()
+
+            }
+
+            MenuItem {
+                text: qsTr("Hide Reference Windows")
+                onTriggered: utils.closeAllPreviewWindows()
             }
         }
     }
@@ -98,7 +121,7 @@ Window {
         running: true
         repeat: true
         onTriggered: {
-            saveCollections();
+            mainWindow.saveCollections();
         }
     }
 
@@ -284,6 +307,7 @@ Window {
             anchors.verticalCenter: parent.verticalCenter
             color: "#1a1a1a"
             radius: 10
+            visible: !mainWindow.isTrialOver
 
             border.width: 0.5
             border.color: "#22ffffff"

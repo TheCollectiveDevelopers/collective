@@ -62,6 +62,7 @@ qt_add_qml_module(appcollective
         assets/volume.png
         assets/pause.png
         assets/switch.png
+        assets/clipboard.png
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -77,6 +78,25 @@ set_target_properties(appcollective PROPERTIES
 
 target_include_directories(appcollective PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+if(DEFINED ENV{USE_PAID_VERSION})
+  set(USE_PAID_DEFAULT "$ENV{USE_PAID_VERSION}")
+else()
+  set(USE_PAID_DEFAULT "OFF")
+endif()
+
+if(NOT DEFINED USE_PAID_VERSION)
+  set(USE_PAID_VERSION "${USE_PAID_DEFAULT}" CACHE BOOL "Use paid version" FORCE)
+endif()
+
+option(USE_PAID_VERSION "Build with paid version features" OFF)
+
+
+if(USE_PAID_VERSION)
+  target_compile_definitions(appcollective PRIVATE PAID_VERSION)
+else()
+  target_compile_definitions(appcollective PRIVATE FREE_VERSION)
+endif()
 
 target_link_libraries(appcollective
     PRIVATE Qt6::Quick

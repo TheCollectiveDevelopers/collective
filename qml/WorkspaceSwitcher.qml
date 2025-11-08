@@ -142,7 +142,11 @@ Item {
 
             for (var i = 0; i < workspaceList.count; i++) {
                 if (workspaceList.get(i).key === workspaceSwitcher.deleteWorkspace) {
-                    workspaceSwitcher.currentWorkspace = workspaceList.get(i - 1).key;
+                    if(i === 0){
+                        workspaceSwitcher.currentWorkspace = workspaceList.get(1).key;
+                    }else{
+                        workspaceSwitcher.currentWorkspace = workspaceList.get(i - 1).key;
+                    }
                     workspaceList.remove(i, 1);
                     workspaceSwitcher.workspaceDeleted(workspaceSwitcher.deleteWorkspace);
                     break;

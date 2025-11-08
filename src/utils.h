@@ -29,6 +29,7 @@ public:
     Q_INVOKABLE void startDrag(const QString& fileUrl, const QString& imageUrl, QQuickItem* source) const;
     Q_INVOKABLE bool checkUpdates() const;
     Q_INVOKABLE void performUpdate() const;
+    Q_INVOKABLE void addFileToClipboard(const QString &fileUrl) const;
 signals:
     void toggleVisible();
     void closeAllPreviewWindows();

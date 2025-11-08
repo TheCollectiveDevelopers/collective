@@ -161,7 +161,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          modules: 'qtmultimedia qtpdf qt5compat'
+          modules: 'qtmultimedia qtpdf qt5compat qtshadertools'
           cache: true
 
       - name: Setup CMake
@@ -233,7 +233,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          modules: 'qtmultimedia qt5compat qtpdf'
+          modules: 'qtmultimedia qt5compat qtpdf qtshadertools'
           cache: true
 
       - name: Setup CMake

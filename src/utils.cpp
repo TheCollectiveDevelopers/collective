@@ -41,6 +41,8 @@ bool Utils::isTrialOver() const{
     QDir dir;
     if (!dir.exists(trialDir)) {
         dir.mkpath(trialDir);
+
+        qDebug() <<"trial directory test";
     }
 
     qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
@@ -127,6 +129,7 @@ void Utils::saveSettings(QJsonObject settings) const {
     QDir dir;
     if (!dir.exists(settingsDir)) {
         dir.mkpath(settingsDir);
+        qDebug() <<"trial directory test 2";
     }
 
     QFile file(settingsPath);
@@ -159,6 +162,7 @@ QString Utils::saveAsset(QUrl url) const {
     QDir dir;
     if (!dir.exists(assetsDir)) {
         dir.mkpath(assetsDir);
+        qDebug() <<"trial directory test 3";
     }
 
     if (url.isLocalFile()) {
@@ -266,6 +270,7 @@ void Utils::saveCollections(QJsonArray collections) const {
     QDir dir;
     if (!dir.exists(collectionsDir)) {
         dir.mkpath(collectionsDir);
+        qDebug() <<"trial directory test 4";
     }
 
     QJsonObject root;
@@ -284,6 +289,11 @@ QJsonArray Utils::loadCollections() const {
     QString collectionsPath = homePath + "/.collective/collections.json";
 
     QFile file(collectionsPath);
+    if (!file.exists()){
+        qDebug() << "howdy folks";
+        return QJsonArray();
+        
+    }
     if (file.open(QIODevice::ReadOnly)) {
         QByteArray data = file.readAll();
         file.close();

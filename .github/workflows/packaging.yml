@@ -39,6 +39,9 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
+    strategy:
+      matrix:
+        version: [free, paid]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,7 +63,8 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
+          $USE_PAID = if ("${{ matrix.version }}" -eq "paid") { "ON" } else { "OFF" }
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} -DUSE_PAID_VERSION=$USE_PAID
 
       - name: Build
         run: cmake --build build --config Release
@@ -78,7 +82,7 @@ jobs:
       - name: Create Windows ZIP
         run: |
           cd installer
-          7z a ../collective-windows-x86_64.zip *
+          7z a ../collective-windows-x86_64-${{ matrix.version }}.zip *
 
       - name: Install Qt Installer Framework
         run: |
@@ -96,7 +100,7 @@ jobs:
       - name: Create online installer
         run: |
           $IFW_PATH = Get-ChildItem -Path "${{ github.workspace }}\Qt\Tools\QtInstallerFramework" -Directory | Select-Object -First 1
-          & "$IFW_PATH\bin\binarycreator.exe" -c packaging\windows\ifw\config\config.xml -p packaging\windows\ifw\packages collective-windows-x86_64-installer-online.exe
+          & "$IFW_PATH\bin\binarycreator.exe" -c packaging\windows\ifw\config\config.xml -p packaging\windows\ifw\packages collective-windows-x86_64-installer-online-${{ matrix.version }}.exe
 
       - name: Create repository for updates
         run: |
@@ -106,7 +110,7 @@ jobs:
       - name: Create repository archive
         run: |
           cd repository
-          7z a ../collective-windows-repository.7z *
+          7z a ../collective-windows-repository-${{ matrix.version }}.7z *
 
       - name: Create self-signed certificate
         run: |
@@ -119,19 +123,19 @@ jobs:
           # Find signtool in Windows SDK
           $signtool = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($signtool) {
-            & $signtool.FullName sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer-online.exe
+            & $signtool.FullName sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer-online-${{ matrix.version }}.exe
           } else {
             Write-Host "signtool not found, trying from PATH"
-            signtool sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer-online.exe
+            signtool sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer-online-${{ matrix.version }}.exe
           }
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            collective-windows-x86_64.zip
-            collective-windows-x86_64-installer-online.exe
-            collective-windows-repository.7z
+            collective-windows-x86_64-${{ matrix.version }}.zip
+            collective-windows-x86_64-installer-online-${{ matrix.version }}.exe
+            collective-windows-repository-${{ matrix.version }}.7z
           tag_name: ${{ needs.autotag.outputs.new-tag || 'latest' }}
           name: ${{ needs.autotag.outputs.new-tag || 'Latest Build' }}
           draft: false
@@ -144,6 +148,9 @@ jobs:
     runs-on: macos-latest
     permissions:
       contents: write
+    strategy:
+      matrix:
+        version: [free, paid]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -164,7 +171,8 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
+          USE_PAID=${{ matrix.version == 'paid' && 'ON' || 'OFF' }}
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} -DUSE_PAID_VERSION=$USE_PAID
 
       - name: Build
         run: cmake --build build --config Release
@@ -172,11 +180,12 @@ jobs:
       - name: Deploy Qt dependencies
         run: |
           macdeployqt build/appcollective.app -qmldir=qml -dmg
+          mv build/appcollective.dmg build/collective-macos-${{ matrix.version }}.dmg
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/*.dmg
+          files: build/collective-macos-${{ matrix.version }}.dmg
           tag_name: ${{ needs.autotag.outputs.new-tag || 'latest' }}
           name: ${{ needs.autotag.outputs.new-tag || 'Latest Build' }}
           draft: false
@@ -190,6 +199,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
           contents: write
+    strategy:
+      matrix:
+        version: [free, paid]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -231,10 +243,12 @@ jobs:
 
       - name: Configure CMake
         run: |
+          USE_PAID=${{ matrix.version == 'paid' && 'ON' || 'OFF' }}
           cmake -B build -S . \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=/usr \
-            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
+            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
+            -DUSE_PAID_VERSION=$USE_PAID
 
       - name: Build
         run: cmake --build build --config Release
@@ -292,20 +306,20 @@ jobs:
 
       - name: Rename AppImage
         run: |
-          mv Collective-*.AppImage Collective.AppImage || true
+          mv Collective-*.AppImage Collective-${{ matrix.version }}.AppImage || true
           ls -la *.AppImage
 
       - name: Generate zsync file
         run: |
           sudo apt-get install -y zsync
-          zsyncmake -u https://collectiveboard.pages.dev/linux/Collective.AppImage Collective.AppImage
+          zsyncmake -u https://collectiveboard.pages.dev/linux/Collective-${{ matrix.version }}.AppImage Collective-${{ matrix.version }}.AppImage
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            Collective.AppImage
-            Collective.AppImage.zsync
+            Collective-${{ matrix.version }}.AppImage
+            Collective-${{ matrix.version }}.AppImage.zsync
           tag_name: ${{ needs.autotag.outputs.new-tag || 'latest' }}
           name: ${{ needs.autotag.outputs.new-tag || 'Latest Build' }}
           draft: false

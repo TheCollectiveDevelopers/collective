@@ -14,6 +14,7 @@ class Utils : public QObject {
 public:
     enum AssetTypes { Image, Music, PDF, Video, Other, URL };
     Q_ENUM(AssetTypes)
+    Q_INVOKABLE bool isTrialOver() const;
     Q_INVOKABLE bool allowDropFile(QUrl fileUrl) const;
     Q_INVOKABLE AssetTypes detectFileType(QUrl fileUrl) const;
     Q_INVOKABLE void saveImage(QUrl url) const;

@@ -206,6 +206,22 @@ Window {
                 width: 15
                 height: 15
                 visible: titleBar.hovering
+                source: "qrc:/qt/qml/collective/assets/clipboard.png"
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+
+                    onClicked: {
+                        utils.addFileToClipboard(previewWindow.uri)
+                    }
+                }
+            }
+
+            Image {
+                width: 15
+                height: 15
+                visible: titleBar.hovering
                 source: "qrc:/qt/qml/collective/assets/reflect-white.png"
 
                 MouseArea {

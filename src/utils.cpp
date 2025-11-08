@@ -24,6 +24,8 @@
 #include <QCoreApplication>
 #include <qnamespace.h>
 #include <QtSystemDetection>
+#include <QClipboard>
+#include <QImage>
 
 bool Utils::allowDropFile(QUrl fileUrl) const {
     QMimeDatabase db;
@@ -360,4 +362,43 @@ void Utils::performUpdate() const{
 
     #ifdef Q_OS_LINUX
     #endif
+}
+
+void Utils::addFileToClipboard(const QString &fileUrl) const{
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    if (!clipboard) {
+        return;
+    }
+
+    QMimeData *mimeData = new QMimeData();
+    
+    // Convert the file URL to a QUrl and add it to the MIME data
+    QUrl url(fileUrl);
+    QList<QUrl> urls;
+    urls.append(url);
+    mimeData->setUrls(urls);
+
+    // If it's a local file, also set the raw data with appropriate MIME type
+    QString localPath = url.toLocalFile();
+    if (!localPath.isEmpty() && QFile::exists(localPath)) {
+        QMimeDatabase db;
+        QMimeType mimeType = db.mimeTypeForFile(localPath);
+        
+        if (mimeType.name().startsWith("image/")) {
+            QImage image(localPath);
+            if (!image.isNull()) {
+                mimeData->setImageData(image);
+            }
+        } else if (mimeType.name().startsWith("audio/") || mimeType.name() == "application/pdf") {
+            QFile file(localPath);
+            if (file.open(QIODevice::ReadOnly)) {
+                QByteArray fileData = file.readAll();
+                file.close();
+                mimeData->setData(mimeType.name(), fileData);
+            }
+        }
+    }
+
+    // Set the MIME data to the clipboard
+    clipboard->setMimeData(mimeData);
 }

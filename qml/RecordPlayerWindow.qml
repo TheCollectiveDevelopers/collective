@@ -146,7 +146,7 @@ Window{
                         anchors.verticalCenter: parent.verticalCenter
 
                         Item {
-                            width: titleBar.hovering ? 15 : 0
+                            width: titleBar.hovering ? 40 : 0
                             height: 15
                             visible: titleBar.hovering
 
@@ -157,18 +157,38 @@ Window{
                                 }
                             }
 
-                            Image {
-                                width: 15
-                                height: 15
-                                anchors.centerIn: parent
-                                source: "qrc:/qt/qml/collective/assets/switch.png"
+                            Row{
+                                id: iconRow
+                                spacing: 10
+                                anchors.fill: parent
 
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
+                                Image {
+                                    width: 15
+                                    height: 15
+                                    source: "qrc:/qt/qml/collective/assets/clipboard.png"
 
-                                    onClicked: {
-                                        recordPlayerWindow.expandedView = !recordPlayerWindow.expandedView;
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+
+                                        onClicked: {
+                                            utils.addFileToClipboard(recordPlayerWindow.uri)
+                                        }
+                                    }
+                                }
+
+                                Image {
+                                    width: 15
+                                    height: 15
+                                    source: "qrc:/qt/qml/collective/assets/switch.png"
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+
+                                        onClicked: {
+                                            recordPlayerWindow.expandedView = !recordPlayerWindow.expandedView;
+                                        }
                                     }
                                 }
                             }

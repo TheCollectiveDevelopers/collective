@@ -16,7 +16,7 @@ Item {
     Component.onCompleted: {
         if(!loaded){
             var collections = utils.loadCollections();
-            workspaceSwitcher.savedCollectionsLoaded(collections[0].key);
+            
 
             if(collections.length === 0){
                 workspaceList.append({
@@ -27,8 +27,9 @@ Item {
                 workspaceSwitcher.currentWorkspace = workspaceList.get(0).key;
                 workspaceSwitcher.loaded = true;
                 return;
+            }else{
+                workspaceSwitcher.savedCollectionsLoaded(collections[0].key);
             }
-
             for(var i=0; i<collections.length; i++){
                 var {emoji, key} = collections[i];
                 workspaceList.append({

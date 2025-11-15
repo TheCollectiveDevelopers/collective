@@ -2,6 +2,9 @@
 
 Collective is a dock for designers. Put all your references in one place for easy access.
 
+
+<img width="1304" height="2066" alt="Frame 2087326116" src="https://github.com/user-attachments/assets/3a85af46-4860-49b4-aa89-6c23aadccabb" />
+
 ## Features
 
 - **Visual Reference Management**: Store and organize images, videos, and other media files

@@ -74,68 +74,49 @@ jobs:
           cd build/Release
           windeployqt appcollective.exe --qmldir ../../qml --release --compiler-runtime
 
-      - name: Create installer directory
+      - name: Prepare MSIX layout
         run: |
-          mkdir installer
-          xcopy build\Release installer\ /E /I /Y
+          New-Item -ItemType Directory -Path msix -Force | Out-Null
+          xcopy build\Release msix\ /E /I /Y
+          Copy-Item packaging\windows\appx\AppxManifest.xml msix\AppxManifest.xml -Force
+          New-Item -ItemType Directory -Path msix\Assets -Force | Out-Null
 
-      - name: Create Windows ZIP
-        run: |
-          cd installer
-          7z a ../collective-windows-x86_64-${{ matrix.version }}.zip *
+          Add-Type -AssemblyName System.Drawing
+          function New-MsixIcon($Size, $OutputPath) {
+            $source = [System.Drawing.Image]::FromFile("${{ github.workspace }}\assets\icon.png")
+            $bitmap = New-Object System.Drawing.Bitmap $Size, $Size
+            $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+            $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+            $graphics.DrawImage($source, 0, 0, $Size, $Size)
+            $bitmap.Save($OutputPath, [System.Drawing.Imaging.ImageFormat]::Png)
+            $graphics.Dispose()
+            $bitmap.Dispose()
+            $source.Dispose()
+          }
 
-      - name: Install Qt Installer Framework
-        run: |
-          pip install aqtinstall
-          aqt install-tool windows desktop tools_ifw --outputdir ${{ github.workspace }}\Qt
+          New-MsixIcon 44 "${{ github.workspace }}\msix\Assets\Square44x44Logo.png"
+          New-MsixIcon 50 "${{ github.workspace }}\msix\Assets\StoreLogo.png"
+          New-MsixIcon 150 "${{ github.workspace }}\msix\Assets\Square150x150Logo.png"
 
-      - name: Copy installer icon to IFW config
-        run: |
-          copy assets\icon.ico packaging\windows\ifw\config\installer-icon.ico
+          if (Test-Path msix\vc_redist.x64.exe) {
+            Remove-Item msix\vc_redist.x64.exe -Force
+          }
 
-      - name: Copy application to IFW package data
+      - name: Create MSIX package
         run: |
-          xcopy installer\* packaging\windows\ifw\packages\com.collective.app\data\ /E /I /Y
-
-      - name: Create online installer
-        run: |
-          $IFW_PATH = Get-ChildItem -Path "${{ github.workspace }}\Qt\Tools\QtInstallerFramework" -Directory | Select-Object -First 1
-          & "$IFW_PATH\bin\binarycreator.exe" -c packaging\windows\ifw\config\config.xml -p packaging\windows\ifw\packages collective-windows-x86_64-installer-online-${{ matrix.version }}.exe
-
-      - name: Create repository for updates
-        run: |
-          $IFW_PATH = Get-ChildItem -Path "${{ github.workspace }}\Qt\Tools\QtInstallerFramework" -Directory | Select-Object -First 1
-          & "$IFW_PATH\bin\repogen.exe" -p packaging\windows\ifw\packages repository
-
-      - name: Create repository archive
-        run: |
-          cd repository
-          7z a ../collective-windows-repository-${{ matrix.version }}.7z *
-
-      - name: Create self-signed certificate
-        run: |
-          $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=Collective, O=Collective, C=US" -CertStoreLocation "Cert:\CurrentUser\My" -NotAfter (Get-Date).AddYears(5)
-          $password = ConvertTo-SecureString -String "${{ secrets.CERT_PASSWORD }}" -Force -AsPlainText
-          Export-PfxCertificate -Cert "Cert:\CurrentUser\My\$($cert.Thumbprint)" -FilePath "${{ github.workspace }}\certificate.pfx" -Password $password
-
-      - name: Sign installer
-        run: |
-          # Find signtool in Windows SDK
-          $signtool = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($signtool) {
-            & $signtool.FullName sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer-online-${{ matrix.version }}.exe
+          $makeappx = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\makeappx.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($makeappx) {
+            & $makeappx.FullName pack /d msix /p collective-windows-x86_64-${{ matrix.version }}.msix /o
           } else {
-            Write-Host "signtool not found, trying from PATH"
-            signtool sign /f "${{ github.workspace }}\certificate.pfx" /p "${{ secrets.CERT_PASSWORD }}" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 collective-windows-x86_64-installer-online-${{ matrix.version }}.exe
+            Write-Host "makeappx not found, trying from PATH"
+            makeappx pack /d msix /p collective-windows-x86_64-${{ matrix.version }}.msix /o
           }
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            collective-windows-x86_64-${{ matrix.version }}.zip
-            collective-windows-x86_64-installer-online-${{ matrix.version }}.exe
-            collective-windows-repository-${{ matrix.version }}.7z
+            collective-windows-x86_64-${{ matrix.version }}.msix
           tag_name: ${{ needs.autotag.outputs.new-tag || 'latest' }}
           name: ${{ needs.autotag.outputs.new-tag || 'Latest Build' }}
           draft: false

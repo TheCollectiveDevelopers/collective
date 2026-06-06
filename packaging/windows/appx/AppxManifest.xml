@@ -7,7 +7,7 @@
 
   <Identity
     Name="com.collective.app"
-    Publisher="CN=Collective, OID.2.25.311729368913984317654407730594956997722=1"
+    Publisher="CN=Collective"
     Version="1.0.0.0"
     ProcessorArchitecture="x64" />
 

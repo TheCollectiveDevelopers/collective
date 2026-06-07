@@ -6,13 +6,13 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="com.collective.app"
-    Publisher="CN=Collective"
+    Name="Collective.CollectiveDock"
+    Publisher="CN=F61ED3CB-EC06-474F-84D1-3DDAA39D7F29"
     Version="1.0.0.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
-    <DisplayName>Collective</DisplayName>
+    <DisplayName>Collective Dock</DisplayName>
     <PublisherDisplayName>Collective</PublisherDisplayName>
     <Description>Collective is a dock for designers to keep visual references, media, and workspaces in one place.</Description>
     <Logo>Assets\StoreLogo.png</Logo>
@@ -48,7 +48,7 @@
       Executable="appcollective.exe"
       EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="Collective"
+        DisplayName="Collective Dock"
         Description="A dock for designers to collect and manage visual references."
         BackgroundColor="#101010"
         Square150x150Logo="Assets\Square150x150Logo.png"
